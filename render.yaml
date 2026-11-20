@@ -1,0 +1,15 @@
+# Render Blueprint: one free Docker web service. Dashboard → New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: plumeproof
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: ANTHROPIC_API_KEY   # optional: leave empty for template mode (demo works 100% without it)
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5-5
