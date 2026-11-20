@@ -25,6 +25,7 @@ All routes are prefixed with `/api`. The frontend calls relative URLs (`/api/...
 | POST | /api/whatif | WhatIfRequest | WhatIfResult | stateless |
 | GET | /api/replay/script | | ReplayStepInfo[] | |
 | POST | /api/replay/reset | | ReplayFrame | step 0 (intro); resets case KJ-2025-02 |
+| GET | /api/replay/current | | ReplayFrame | the frame the cursor is on (for reloads / after demo reset) |
 | POST | /api/replay/step | ReplayStepRequest | ReplayFrame | applies the next scripted event |
 | GET | /api/replay/frames | | ReplayFrame[] | runs the whole replay in a scratch DB (for the snapshot); doesn't touch live state |
 | POST | /api/evaluate | EvaluateRequest | EvaluationReport | runs the simulation (takes a few seconds) |

@@ -116,7 +116,7 @@ def test_verified_reduction_needs_closure_approval_then_reopens(agent):
     agent = CaseAgent.load("T-1")
     assert agent.observe(kanjur.OBS_2026) is True
     agent = CaseAgent.load("T-1")
-    assert agent.case.status == S.SOURCE_ATTRIBUTION_PENDING and agent.case.reopen_count == 1
+    assert agent.case.status == S.RECURRING and agent.case.reopen_count == 1
     types = [e.type for e in db.list_events("T-1")]
     assert "CASE_REOPENED" in types
     assert any(e.type == "STATUS_CHANGED" and e.data.get("to") == "RECURRING" for e in db.list_events("T-1"))

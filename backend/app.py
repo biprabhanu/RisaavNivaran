@@ -308,6 +308,12 @@ def replay_reset() -> ReplayFrame:
     return replay.reset()
 
 
+@app.get("/api/replay/current", response_model=ReplayFrame, tags=["replay"])
+def replay_current() -> ReplayFrame:
+    """The frame the replay cursor is on now (lets the UI recover after a page reload or 'Reset demo')."""
+    return replay.current_frame()
+
+
 @app.post("/api/replay/step", response_model=ReplayFrame, tags=["replay"])
 def replay_step(req: Optional[ReplayStepRequest] = None) -> ReplayFrame:
     return replay.step(auto_approve=(req or ReplayStepRequest()).auto_approve)

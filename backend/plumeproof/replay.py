@@ -18,7 +18,7 @@ from __future__ import annotations
 import os
 import tempfile
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from . import db, planner
 from .agent import CaseAgent
@@ -321,6 +321,13 @@ def step(auto_approve: bool = True) -> ReplayFrame:
 
     n_events = len(db.list_events(CASE_ID))
     n_calls = len(db.list_tool_calls(CASE_ID))
+
+    # A human REJECTED the approval shown in this frame: the script must not pretend it was approved.
+    shown = current_frame().pending_approval
+    decided = db.get_approval(shown.id) if shown is not None else None
+    if decided is not None and decided.status == ApprovalStatus.REJECTED:
+        return _rejection_frame(index, decided, n_events, n_calls)
+
     pending = db.list_approvals(CASE_ID, ApprovalStatus.PENDING)
     if pending and not auto_approve:
         # Wait only while the approval SHOWN in the current frame is still undecided. If a human already
@@ -344,6 +351,39 @@ def step(auto_approve: bool = True) -> ReplayFrame:
     res = nxt.run()
     frame = _build_frame(index + 1, nxt, res, n_events, n_calls)
     _save_state(index + 1, frame)
+    return frame
+
+
+def _rejection_frame(index: int, rejected: Any, n_events: int, n_calls: int) -> ReplayFrame:
+    """
+    The presenter clicked Reject. The agent has already logged the decision and re-planned
+    (CaseAgent.on_approval_decided). It does NOT act. For the replay to continue, the agent
+    re-proposes the same step as a new approval item, so the human stays in control.
+    """
+    agent = _agent()
+    agent.request_approval(
+        rejected.kind, rejected.title,
+        f"Re-proposed after the reviewer rejected it. {rejected.summary}",
+        proposed_text=rejected.proposed_text, payload=dict(rejected.payload),
+        evidence_ids=list(rejected.evidence_ids) + [rejected.id],
+    )
+    prev = current_frame()
+    timeline = db.list_events(CASE_ID)
+    frame = prev.model_copy(update={
+        "title": f"Human rejected: {rejected.title}",
+        "narration": ("HUMAN DECISION: the reviewer REJECTED this step, so the agent did not act. The rejection is "
+                      "logged in the audit trail, the case status is unchanged, and the agent re-planned. To continue "
+                      "the replay, approve the re-proposed item (or edit it first)."),
+        "label": DataLabel.HUMAN_DECISION,
+        "case": case_detail(),
+        "tool_calls": db.list_tool_calls(CASE_ID)[n_calls:],
+        "new_events": timeline[n_events:],
+        "timeline": timeline,
+        "pending_approval": _pending(),
+        "banner": Banner(kind="warning", title="HUMAN REJECTED: THE AGENT DID NOT ACT",
+                         text="Every critical step waits for a human. Rejections are logged and the agent re-plans."),
+    })
+    _save_state(index, frame)
     return frame
 
 

@@ -399,7 +399,8 @@ class CaseAgent:
         draft = tools.draft_notice(self.case, self._notice_context(action_id), allow_llm=False)
         return self.request_approval(
             action.approval_kind or ApprovalKind.FIELD_INVESTIGATION,
-            f"Approve investigation plan: {action.label}",
+            (f"Approve official request to operator: {action.label}"
+             if action.approval_kind == ApprovalKind.NOTIFICATION else f"Approve field investigation: {action.label}"),
             f"{action.label}: ₹{action.cost_inr:,.0f}, {action.time_days:g} day(s). {action.description}",
             proposed_text=draft.text,
             payload={"purpose": "investigation", "action_id": action_id},
@@ -706,7 +707,8 @@ class CaseAgent:
                     label=obs.label, notes="New pre-intervention baseline after reopening (±25% assumption).",
                 )
                 self.save()
-                self.request_transition(S.SOURCE_ATTRIBUTION_PENDING, reason="recurring case returned to attribution")
+                # The case stays visibly RECURRING (an open status). The next approved investigation moves it
+                # RECURRING → INVESTIGATION_REQUESTED through the transition table.
                 self.plan()
                 return True
         return False
