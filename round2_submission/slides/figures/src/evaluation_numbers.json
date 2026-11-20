@@ -1,0 +1,73 @@
+{
+  "policies": [
+    {
+      "policy_id": "A",
+      "label": "A: Alert-only",
+      "false_closures": 25,
+      "n_cases": 25,
+      "resolved_cases": 6,
+      "correct_attribution_rate": 0.0,
+      "attribution_inspections_per_case": 0.0,
+      "inspections_per_resolved": 0.0,
+      "cost_per_resolved_inr": 0.0,
+      "mean_days_to_stakeholder": 30.0,
+      "traceability_pct": 0.0,
+      "mean_days_to_closure": 44.0
+    },
+    {
+      "policy_id": "B",
+      "label": "B: Fixed checklist",
+      "false_closures": 25,
+      "n_cases": 25,
+      "resolved_cases": 15,
+      "correct_attribution_rate": 0.84,
+      "attribution_inspections_per_case": 1.8,
+      "inspections_per_resolved": 3.0,
+      "cost_per_resolved_inr": 136667.0,
+      "mean_days_to_stakeholder": 7.0,
+      "traceability_pct": 82.8,
+      "mean_days_to_closure": 37.4
+    },
+    {
+      "policy_id": "C",
+      "label": "C: PlumeProof",
+      "false_closures": 0,
+      "n_cases": 25,
+      "resolved_cases": 25,
+      "correct_attribution_rate": 1.0,
+      "attribution_inspections_per_case": 0.72,
+      "inspections_per_resolved": 3.0,
+      "cost_per_resolved_inr": 128000.0,
+      "mean_days_to_stakeholder": 1.0,
+      "traceability_pct": 100.0,
+      "mean_days_to_closure": 46.72
+    },
+    {
+      "policy_id": "C_noplan",
+      "label": "C-ablation: planner disabled",
+      "false_closures": 0,
+      "n_cases": 25,
+      "resolved_cases": 25,
+      "correct_attribution_rate": 1.0,
+      "attribution_inspections_per_case": 0.84,
+      "inspections_per_resolved": 3.24,
+      "cost_per_resolved_inr": 127400.0,
+      "mean_days_to_stakeholder": 1.0,
+      "traceability_pct": 100.0,
+      "mean_days_to_closure": 78.76
+    }
+  ],
+  "sensitivity": {
+    "n_draws": 200,
+    "perturbation": 0.2,
+    "top_action_stability_pct": 100.0,
+    "mean_kendall_tau": 0.955,
+    "top_action_counts": {
+      "records_request": 200
+    },
+    "c_false_closures_perturbed": 0,
+    "c_inspections_per_resolved_perturbed": 2.36
+  },
+  "seed": 2026,
+  "n": 25
+}

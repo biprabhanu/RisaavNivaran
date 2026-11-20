@@ -1,0 +1,88 @@
+{
+  "prior": {
+    "waste_surface": 0.5,
+    "gas_collection": 0.35,
+    "flare": 0.15
+  },
+  "entropy": 1.4406454496153462,
+  "lambda": 1000.0,
+  "actions": [
+    {
+      "id": "records_request",
+      "label": "Request flare and gas-collection records",
+      "eig": 0.4994309648439659,
+      "cost": 2000.0,
+      "time": 1.0,
+      "gain_per_10k": 2.497154824219829,
+      "score_per_10k": 1.6647698828132196,
+      "rank": 1
+    },
+    {
+      "id": "ogi_survey",
+      "label": "Gas-imaging (OGI) survey of the gas-collection system",
+      "eig": 0.41269398115932665,
+      "cost": 25000.0,
+      "time": 2.0,
+      "gain_per_10k": 0.1650775924637307,
+      "score_per_10k": 0.15284962265160246,
+      "rank": 2
+    },
+    {
+      "id": "ground_survey",
+      "label": "Comprehensive ground-level survey",
+      "eig": 0.9137670457447432,
+      "cost": 60000.0,
+      "time": 5.0,
+      "gain_per_10k": 0.1522945076241239,
+      "score_per_10k": 0.14057954549919127,
+      "rank": 3
+    },
+    {
+      "id": "satellite_wait",
+      "label": "Await the next satellite observation",
+      "eig": 0.0,
+      "cost": 0.0,
+      "time": 30.0,
+      "gain_per_10k": null,
+      "score_per_10k": 0.0,
+      "rank": 4
+    }
+  ],
+  "fault_found": {
+    "p": 0.43275,
+    "posterior": {
+      "waste_surface": 0.057770075101097634,
+      "gas_collection": 0.6510687463893703,
+      "flare": 0.29116117850953205
+    },
+    "entropy_after": 1.1590266244934304
+  },
+  "no_fault": {
+    "p": 0.5672499999999999,
+    "posterior": {
+      "waste_surface": 0.8373732921992068,
+      "gas_collection": 0.12031732040546496,
+      "flare": 0.04230938739532834
+    },
+    "entropy_after": 0.7750475328723637
+  },
+  "verification": {
+    "verdict": "VERIFIED_REDUCTION",
+    "pre_low": 1302.0,
+    "pre_high": 2170.0,
+    "post_low": 460.0,
+    "post_high": 760.0,
+    "threshold": 760.0
+  },
+  "claim_only_verdict": "NO_INDEPENDENT_EVIDENCE",
+  "replan_ogi_unavailable": {
+    "ranked": [
+      "ground_survey",
+      "satellite_wait"
+    ],
+    "excluded": [
+      "records_request",
+      "ogi_survey"
+    ]
+  }
+}
