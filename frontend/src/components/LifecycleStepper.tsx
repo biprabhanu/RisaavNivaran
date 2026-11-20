@@ -17,7 +17,7 @@ export function LifecycleStepper({ status }: { status: CaseStatus }) {
         data-current={current}
         className={`px-3 py-1.5 rounded-lg border text-xs font-semibold whitespace-nowrap transition ${
           current
-            ? `${STATUS_META[s].cls} ring-2 ring-offset-1 ring-slate-900 scale-105`
+            ? `${STATUS_META[s].cls} ring-2 ring-offset-1 ring-teal-600`
             : passed
               ? 'bg-slate-100 text-slate-500 border-slate-200'
               : 'bg-white text-slate-400 border-slate-200'

@@ -11,7 +11,7 @@ import { entropy } from '../lib/bayes';
 import { BeliefChart } from '../components/BeliefChart';
 import { IntervalChart } from '../components/IntervalChart';
 import { LifecycleStepper } from '../components/LifecycleStepper';
-import { Caption, Card, CardHeader, Chip, ErrorBox, LabelChip, Spinner, StatusPill, btn } from '../components/ui';
+import { Card, CardHeader, Chip, ErrorBox, LabelChip, Spinner, StatusPill, btn } from '../components/ui';
 
 export default function CaseDetailPage() {
   const { id = 'KJ-2025-02' } = useParams();
@@ -58,22 +58,21 @@ export default function CaseDetailPage() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        everything the agent knows about one case: real observations, the competing source hypotheses and how they changed, open questions, who is accountable, deadlines, and
-        the verification state. Try "Try to close case" to see the guardrail.
-      </Caption>
 
       <Card className="p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-extrabold">
+              <h1 className="text-2xl md:text-[28px] font-bold tracking-tight">
                 {c.id}: {data.facility.name}
               </h1>
               <StatusPill status={c.status} large />
-              <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${c.priority === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>{c.priority} priority</span>
+              <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${c.priority === 'Critical' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>{c.priority} priority</span>
             </div>
-            <p className="text-slate-500 mt-1">
+            <p className="text-[15px] text-slate-600 mt-1.5" data-testid="page-caption">
+              Everything the agent knows about this case: observations, hypotheses, stakeholders and deadlines.
+            </p>
+            <p className="text-xs text-slate-400 mt-1">
               {data.facility.location} · {c.title} · in-world date {fmtDate(c.sim_date)}
               {c.reopen_count > 0 && <span className="ml-2 text-red-700 font-semibold">· reopened {c.reopen_count}×</span>}
             </p>
@@ -97,13 +96,13 @@ export default function CaseDetailPage() {
           <CardHeader title="Satellite observations" right={<LabelChip label="REAL DATA" />} />
           <div className="p-5 grid sm:grid-cols-2 gap-3">
             {data.observations.map((o) => (
-              <div key={o.id} className="p-4 rounded-xl border border-blue-100 bg-blue-50/30">
+              <div key={o.id} className="p-4 rounded-xl border border-slate-100 bg-slate-50/30">
                 <div className="flex items-center justify-between">
                   <span className="font-bold">{o.plume_label}</span>
-                  <span className="text-xs text-blue-700 font-semibold">{fmtDate(o.date)}</span>
+                  <span className="text-xs text-slate-700 font-semibold">{fmtDate(o.date)}</span>
                 </div>
                 <div className="my-2">
-                  <span className="text-2xl font-extrabold text-blue-900 num">{Math.round(o.rate_kg_h).toLocaleString('en-IN')}</span>
+                  <span className="text-2xl font-bold text-slate-900 num">{Math.round(o.rate_kg_h).toLocaleString('en-US')}</span>
                   <span className="text-sm text-slate-600 ml-1">kg CH₄/h{o.uncertainty_kg_h ? ` ± ${Math.round(o.uncertainty_kg_h)}` : ''}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -127,7 +126,7 @@ export default function CaseDetailPage() {
               <Lock className="w-4 h-4" /> Try to close case
             </button>
             {decision && (
-              <div data-testid="transition-decision" className={`rounded-xl border p-3 text-sm ${decision.allowed ? 'border-emerald-300 bg-emerald-50 text-emerald-900' : 'border-red-300 bg-red-50 text-red-900'}`}>
+              <div data-testid="transition-decision" className={`rounded-xl border p-3 text-sm ${decision.allowed ? 'border-teal-300 bg-teal-50 text-teal-900' : 'border-red-300 bg-red-50 text-red-900'}`}>
                 <strong>{decision.allowed ? 'ALLOWED' : decision.requires_approval ? 'NEEDS HUMAN APPROVAL' : 'REJECTED'}</strong>: {decision.reason}
               </div>
             )}
@@ -210,7 +209,7 @@ export default function CaseDetailPage() {
                 <span>{d.title}</span>
                 <span className="flex items-center gap-2 whitespace-nowrap">
                   <span className="text-slate-500">{fmtDate(d.due_date)}</span>
-                  <Chip className={d.status === 'met' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : d.status === 'overdue' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-amber-100 text-amber-900 border-amber-200'}>{d.status}</Chip>
+                  <Chip className={d.status === 'met' ? 'bg-teal-100 text-teal-800 border-teal-200' : d.status === 'overdue' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-amber-100 text-amber-900 border-amber-200'}>{d.status}</Chip>
                 </span>
               </div>
             ))}
@@ -249,10 +248,10 @@ export default function CaseDetailPage() {
           {draft && (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center gap-2 mb-2 text-xs">
-                <Chip className={draft.result.mode === 'llm' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-700 border-slate-300'}>
+                <Chip className={draft.result.mode === 'llm' ? 'bg-teal-100 text-teal-800 border-teal-200' : 'bg-slate-200 text-slate-700 border-slate-300'}>
                   {draft.result.mode === 'llm' ? `LLM draft (${draft.result.model ?? 'Claude'})` : 'Template draft'}
                 </Chip>
-                {draft.kind === 'notice' && <span className="text-violet-700 font-semibold">→ queued for human approval before it is "sent" (simulated)</span>}
+                {draft.kind === 'notice' && <span className="text-slate-700 font-semibold">→ queued for human approval before it is "sent" (simulated)</span>}
               </div>
               <pre className="whitespace-pre-wrap font-sans text-sm text-slate-800">{draft.result.text}</pre>
             </div>

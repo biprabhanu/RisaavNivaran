@@ -17,7 +17,7 @@ import { IntervalChart } from '../components/IntervalChart';
 import { PlanTable } from '../components/PlanTable';
 import { SiteMap } from '../components/SiteMap';
 import { Timeline } from '../components/Timeline';
-import { Caption, Card, CardHeader, ErrorBox, LabelChip, btn } from '../components/ui';
+import { Card, CardHeader, ErrorBox, LabelChip, btn } from '../components/ui';
 
 const BASE_MS = 4000;
 
@@ -268,13 +268,13 @@ export default function Replay() {
         title="Evidence Planner"
         subtitle={isFocus ? 'score = EIG / (cost + λ·time) · excluded before ranking if a constraint is violated' : 'score = EIG / (cost + λ·time); constraint-violating actions excluded before ranking'}
         right={frame?.plan_before ? <span className="text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 rounded-md px-2 py-1" data-testid="replanned-badge">RE-RANKED</span> : undefined}
-        icon={<Sparkles className="w-5 h-5 text-emerald-600" />}
+        icon={<Sparkles className="w-5 h-5 text-teal-600" />}
       />
       <div className={isFocus ? 'px-3 py-2' : 'p-4'}>
         {plan ? (
           <>
             <PlanTable plan={plan} before={frame?.plan_before} actions={actions} compact dense={isFocus} />
-            <div className="mt-3 rounded-xl bg-blue-50/60 border border-blue-100 p-3 text-sm text-blue-950 whitespace-pre-line" data-testid="plan-explanation">
+            <div className="mt-3 rounded-xl bg-slate-50/60 border border-slate-100 p-3 text-sm text-slate-950 whitespace-pre-line" data-testid="plan-explanation">
               {plan.explanation}
             </div>
           </>
@@ -302,10 +302,10 @@ export default function Replay() {
 
   return (
     <div className="space-y-4">
-      <Caption>
-        a step-by-step replay of the Kanjur landfill case. <strong>Blue = real Carbon Mapper data</strong>, <strong>amber = simulated operational events</strong>. Watch the agent
-        update its beliefs, re-plan, refuse an unsupported closure, and reopen the case when emissions return.
-      </Caption>
+
+      <p className="text-[15px] text-slate-600 -mt-1" data-testid="page-caption">
+        <span className="font-semibold text-slate-900">Live replay:</span> the Kanjur landfill case, step by step. Watch the agent update its beliefs, refuse an unsupported closure, and reopen the case.
+      </p>
 
       {/* 1. Controls + current step (always the first thing on screen after each step) */}
       <div ref={controlsRef} className="scroll-mt-40">
@@ -314,7 +314,7 @@ export default function Replay() {
             <div className="mr-auto min-w-0">
               {frame ? (
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  <span className="text-slate-500 font-semibold hidden xl:inline">Kanjur landfill · Case KJ-2025-02 ·</span>
+                  <span className="text-slate-500 font-medium hidden xl:inline">Kanjur landfill · Case KJ-2025-02 ·</span>
                   <span className="font-bold text-slate-600" data-testid="step-counter">
                     Step {frame.step_index} / {total}
                   </span>
@@ -324,7 +324,7 @@ export default function Replay() {
                       <Calendar className="w-4 h-4" /> {fmtDate(frame.sim_date)}
                     </span>
                   )}
-                  {frame.done && <span className="text-emerald-700 font-bold" data-testid="replay-done">Replay complete ✓</span>}
+                  {frame.done && <span className="text-teal-700 font-bold" data-testid="replay-done">Replay complete ✓</span>}
                 </div>
               ) : (
                 <span className="text-sm text-slate-400" data-testid="step-counter">Loading replay…</span>
@@ -364,7 +364,7 @@ export default function Replay() {
             <h1
               key={frameKey}
               title={frame.title}
-              className="text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 mt-1.5 truncate animate-slidein"
+              className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 mt-1.5 truncate animate-slidein"
               data-testid="step-title"
             >
               {frame.title}
@@ -384,7 +384,7 @@ export default function Replay() {
                     data-active={active ? 'true' : 'false'}
                     title={s.title}
                     className={`min-w-[120px] flex-1 shrink-0 rounded-lg border px-2 py-0.5 text-xs transition ${
-                      active ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-400' : done ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-200 bg-white text-slate-400'
+                      active ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-400' : done ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-200 bg-white text-slate-400'
                     }`}
                   >
                     <div className={`flex items-center gap-1 leading-tight ${active ? 'text-slate-900' : ''}`}>
@@ -449,10 +449,10 @@ export default function Replay() {
             <div className="p-4 space-y-2 max-h-[320px] overflow-auto" data-testid="tool-ticker">
               {tools.length === 0 && <p className="text-sm text-slate-400 italic">No tool calls yet.</p>}
               {[...tools].reverse().map((t) => (
-                <div key={t.id} className={`rounded-lg border px-3 py-2 text-sm ${thisStepTools.has(t.id) ? 'border-emerald-300 bg-emerald-50 animate-slidein' : 'border-slate-200 bg-slate-50'}`}>
+                <div key={t.id} className={`rounded-lg border px-3 py-2 text-sm ${thisStepTools.has(t.id) ? 'border-teal-300 bg-teal-50 animate-slidein' : 'border-slate-200 bg-slate-50'}`}>
                   <div className="font-mono text-[13px]">
                     <span className="text-slate-500">agent called </span>
-                    <span className="font-bold text-emerald-700">{t.tool}</span>
+                    <span className="font-bold text-teal-700">{t.tool}</span>
                     <ChevronRight className="inline w-3 h-3 text-slate-400 mx-1" />
                   </div>
                   <div className="text-slate-700 text-[13px]">{t.output_summary}</div>

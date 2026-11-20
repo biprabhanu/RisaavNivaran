@@ -115,7 +115,7 @@ export function rerank(plan: PlanResult, actions: ActionSpec[], lam: number): Pl
     lam,
     ranked,
     recommended_action_id: top && top.eig_bits >= 0.05 ? top.action_id : null,
-    explanation: `${plan.explanation}\n(Offline: scores recomputed locally at λ = ₹${Math.round(lam).toLocaleString('en-IN')}/day.)`,
+    explanation: `${plan.explanation}\n(Offline: scores recomputed locally at λ = ₹${Math.round(lam).toLocaleString('en-US')}/day.)`,
   };
 }
 

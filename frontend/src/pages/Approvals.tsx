@@ -4,7 +4,7 @@ import { api, errMsg } from '../lib/api';
 import { useApi } from '../lib/hooks';
 import { bumpData, showToast, useAppState } from '../lib/store';
 import { ApprovalCard } from '../components/ApprovalCard';
-import { Caption, ErrorBox, PageTitle, Spinner, Stat } from '../components/ui';
+import { ErrorBox, PageTitle, Spinner, Stat } from '../components/ui';
 
 export default function Approvals() {
   const { offline } = useAppState();
@@ -30,14 +30,10 @@ export default function Approvals() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        the Human Approval Queue. The agent never attributes a source, sends an official notice, dispatches a field team or closes a case on its own; it waits here for a
-        human to Approve, Edit or Reject.
-      </Caption>
-      <PageTitle title="Approval Queue" subtitle="Source attribution · official notifications · field investigations · final closure" />
+      <PageTitle description="Every critical decision waits here for a human to approve, edit or reject." title="Approval Queue" meta="Source attribution · official notifications · field investigations · final closure" />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Stat label="Pending" value={pending.length} tone="amber" />
-        <Stat label="Approved" value={items.filter((i) => i.status === 'APPROVED' || i.status === 'EDITED').length} tone="emerald" />
+        <Stat label="Approved" value={items.filter((i) => i.status === 'APPROVED' || i.status === 'EDITED').length} tone="teal" />
         <Stat label="Rejected" value={items.filter((i) => i.status === 'REJECTED').length} tone="red" />
         <Stat label="Total decisions" value={items.length} />
       </div>

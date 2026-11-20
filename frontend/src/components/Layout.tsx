@@ -1,9 +1,9 @@
-// App shell: Mandar's dark header + tab navigation, LLM badge, Reset demo, offline banner, footer.
+// App shell: light header + tab navigation, LLM badge, Reset demo, offline banner, footer.
 import { useState, type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   Activity, BarChart3, CheckCircle2, Clock, Database, FileText, FlaskConical, Globe, Home, Inbox, Loader2,
-  PlayCircle, RotateCcw, Search, ShieldAlert, WifiOff,
+  PlayCircle, RotateCcw, Search, ShieldCheck, WifiOff,
 } from 'lucide-react';
 import { api, errMsg, retryOnline } from '../lib/api';
 import { useApi } from '../lib/hooks';
@@ -31,8 +31,8 @@ export function Layout({ children }: { children: ReactNode }) {
 
   const badgeText = offline ? 'LLM: off (offline snapshot)' : health?.llm_mode === 'llm' ? 'LLM: on (Claude)' : 'LLM: off (template mode)';
   const badgeCls = !offline && health?.llm_mode === 'llm'
-    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-    : 'bg-slate-700/60 text-slate-200 border-slate-600';
+    ? 'bg-teal-50 text-teal-800 border-teal-200'
+    : 'bg-slate-100 text-slate-700 border-slate-200';
 
   const reset = async () => {
     setResetting(true);
@@ -51,24 +51,24 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col text-[15px]">
       {toast && (
-        <div className="fixed bottom-5 right-5 z-[1000] bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-slidein max-w-md" data-testid="toast">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className="fixed bottom-5 right-5 z-[1000] bg-slate-900 text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-slidein max-w-md" data-testid="toast">
+          <CheckCircle2 className="w-5 h-5 text-teal-400 shrink-0" />
           <span className="text-sm font-medium">{toast}</span>
         </div>
       )}
 
-      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-[500] shadow-md">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[72px] [@media(max-height:820px)]:h-14 flex items-center justify-between gap-4">
+      <header className="bg-white text-slate-900 border-b border-slate-200 sticky top-0 z-[500]">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 [@media(max-height:820px)]:h-14 flex items-center justify-between gap-4">
           <NavLink to="/" className="flex items-center gap-3 min-w-0">
-            <div className="bg-emerald-500 p-2.5 [@media(max-height:820px)]:p-1.5 rounded-xl shadow-lg shadow-emerald-500/20">
-              <ShieldAlert className="w-7 h-7 text-slate-950" />
+            <div className="bg-teal-600 p-2 [@media(max-height:820px)]:p-1.5 rounded-lg">
+              <ShieldCheck className="w-6 h-6 text-white" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight">PlumeProof</span>
-                <span className="hidden sm:inline bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-emerald-500/30">MVP</span>
+                <span className="text-lg font-bold tracking-tight text-slate-900">PlumeProof</span>
+                <span className="hidden sm:inline bg-slate-100 text-slate-600 text-[11px] px-2 py-0.5 rounded-md font-semibold border border-slate-200">MVP</span>
               </div>
-              <p className="hidden md:block text-xs text-slate-400 truncate">From satellite methane alerts to verified mitigation · Team RisaavNivaran, IIT Bombay</p>
+              <p className="hidden md:block text-xs text-slate-500 truncate">From satellite methane alerts to verified mitigation · Team RisaavNivaran, IIT Bombay</p>
             </div>
           </NavLink>
           <div className="flex items-center gap-2 text-xs">
@@ -79,15 +79,15 @@ export function Layout({ children }: { children: ReactNode }) {
               data-testid="reset-demo"
               onClick={reset}
               disabled={resetting || offline}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-100 px-3 py-1.5 rounded-lg font-semibold disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 px-3 py-1.5 rounded-lg font-semibold disabled:opacity-50"
               title="Wipe the database and re-seed the clean demo state"
             >
               {resetting ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />} Reset demo
             </button>
           </div>
         </div>
-        <nav className="bg-slate-950/60 border-t border-slate-800/60 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-[1400px] mx-auto flex space-x-1 overflow-x-auto">
+        <nav className="bg-white border-t border-slate-100 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1600px] mx-auto flex gap-1 overflow-x-auto">
             {NAV.map((n) => {
               const Icon = n.icon;
               return (
@@ -97,14 +97,14 @@ export function Layout({ children }: { children: ReactNode }) {
                   end={n.end}
                   className={({ isActive }) =>
                     `flex items-center gap-2 py-3 [@media(max-height:820px)]:py-2 px-3 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                      isActive ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      isActive ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-500 hover:text-slate-900 hover:border-slate-300'
                     }`
                   }
                 >
                   <Icon className="w-4 h-4" />
                   {n.label}
                   {n.badge && pendingCount > 0 && (
-                    <span data-testid="pending-count" className="bg-violet-500 text-white text-[11px] font-bold rounded-full px-1.5 min-w-[20px] text-center">
+                    <span data-testid="pending-count" className="bg-amber-500 text-white text-[11px] font-bold rounded-full px-1.5 min-w-[20px] text-center">
                       {pendingCount}
                     </span>
                   )}
@@ -114,8 +114,8 @@ export function Layout({ children }: { children: ReactNode }) {
           </div>
         </nav>
         {offline && (
-          <div className="bg-amber-400 text-slate-950 border-b border-amber-600" data-testid="offline-banner">
-            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3 text-sm font-semibold">
+          <div className="bg-amber-50 text-amber-900 border-b border-amber-300" data-testid="offline-banner">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3 text-sm font-semibold">
               <WifiOff className="w-5 h-5" />
               <span>Offline snapshot mode: backend unreachable. Showing a bundled, pre-computed snapshot (read-only).</span>
               <button
@@ -130,16 +130,16 @@ export function Layout({ children }: { children: ReactNode }) {
       </header>
 
 
-      <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</main>
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 [@media(max-height:820px)]:py-5">{children}</main>
 
-      <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 text-center text-sm">
+      <footer className="bg-white text-slate-500 border-t border-slate-200 py-6 text-center text-sm">
         <p className="flex items-center justify-center gap-2">
-          <Activity className="w-4 h-4 text-emerald-400" /> PlumeProof · Agentic AI Hackathon 2026 | Team RisaavNivaran, IIT Bombay
+          <Activity className="w-4 h-4 text-teal-600" /> PlumeProof · Agentic AI Hackathon 2026 | Team RisaavNivaran, IIT Bombay
         </p>
-        <p className="mt-1 text-slate-500 text-xs">
+        <p className="mt-1 text-slate-400 text-xs">
           Every methane plume deserves a timely investigation. Every claimed mitigation outcome must be supported by verifiable evidence.
         </p>
-        <p className="mt-1 text-slate-500 text-xs">
+        <p className="mt-1 text-slate-400 text-xs">
           Carbon Mapper plume observations (Kanjur, 9 Feb 2025 &amp; 3 Apr 2026) are real · all operational events, stakeholder responses and measurements are simulated and labelled.
         </p>
       </footer>

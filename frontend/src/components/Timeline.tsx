@@ -14,7 +14,7 @@ export function Timeline({ events, newIds, compact = false, newestFirst = false 
         return (
           <div key={evt.id} className={`relative pl-5 ${isNew ? 'animate-slidein' : ''}`} data-testid="timeline-event">
             <div className={`absolute -left-[9px] top-2 w-4 h-4 rounded-full border-2 border-white shadow ${LABEL_DOT[evt.label] ?? 'bg-slate-400'}`} />
-            <div className={`rounded-xl border shadow-sm ${isNew ? 'border-emerald-300 bg-emerald-50/50' : 'border-slate-200 bg-slate-50'} ${compact ? 'p-3' : 'p-4'}`}>
+            <div className={`rounded-xl border shadow-sm ${isNew ? 'border-teal-300 bg-teal-50/50' : 'border-slate-200 bg-slate-50'} ${compact ? 'p-3' : 'p-4'}`}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <LabelChip label={evt.label} />
@@ -28,11 +28,11 @@ export function Timeline({ events, newIds, compact = false, newestFirst = false 
                 <Chip>Actor: {evt.actor_name} ({evt.actor})</Chip>
                 <Chip className="bg-white text-slate-600 border-slate-200 font-mono">{evt.type}</Chip>
                 {evt.tool && (
-                  <Chip className="bg-slate-900 text-emerald-300 border-slate-900 font-mono">
+                  <Chip className="bg-slate-50 text-slate-600 border-slate-200 font-mono">
                     <Wrench className="w-3 h-3" /> {evt.tool}
                   </Chip>
                 )}
-                {evt.chain_stage && <Chip className="bg-sky-50 text-sky-800 border-sky-200">Chain: {evt.chain_stage}</Chip>}
+                {evt.chain_stage && <Chip className="bg-slate-50 text-slate-800 border-slate-200">Chain: {evt.chain_stage}</Chip>}
                 {!compact && evt.evidence_ids.length > 0 && (
                   <Chip className="bg-white text-slate-500 border-slate-200 font-mono">evidence: {evt.evidence_ids.join(', ')}</Chip>
                 )}

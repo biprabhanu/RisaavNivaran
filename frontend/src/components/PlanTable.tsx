@@ -45,14 +45,14 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false, de
             const isOpen = open === r.action_id;
             return (
               <Fragment key={r.action_id}>
-                <tr className={`transition ${r.rank === 1 ? 'bg-emerald-50/60' : 'hover:bg-slate-50/80'}`} data-testid={`ranked-${r.action_id}`}>
+                <tr className={`transition ${r.rank === 1 ? 'bg-teal-50/60' : 'hover:bg-slate-50/80'}`} data-testid={`ranked-${r.action_id}`}>
                   <td className={cell}>
-                    <span className={`inline-flex ${dense ? 'w-6 h-6' : 'w-7 h-7'} items-center justify-center rounded-full text-xs font-bold ${r.rank === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>{r.rank}</span>
+                    <span className={`inline-flex ${dense ? 'w-6 h-6' : 'w-7 h-7'} items-center justify-center rounded-full text-xs font-bold ${r.rank === 1 ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-700'}`}>{r.rank}</span>
                   </td>
                   <td className={`${cell} font-semibold text-slate-900`}>
                     <button className="flex items-center gap-1.5 text-left" onClick={() => setOpen(isOpen ? null : r.action_id)}>
                       {isOpen ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
-                      {r.rank === 1 && <Trophy className="w-4 h-4 text-emerald-600" />}
+                      {r.rank === 1 && <Trophy className="w-4 h-4 text-teal-600" />}
                       {r.label}
                     </button>
                     {was != null && was !== r.rank && (
@@ -63,7 +63,7 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false, de
                   <td className={`${cell} text-right whitespace-nowrap num`}>{inr(r.cost_inr)}</td>
                   <td className={`${cell} text-right whitespace-nowrap num`}>{num(r.time_days)} d</td>
                   {!compact && <td className={`${cell} text-right whitespace-nowrap num text-slate-600`}>{inr(r.effective_cost)}</td>}
-                  <td className={`${cell} text-right whitespace-nowrap font-extrabold text-emerald-700 num`}>{r.score_per_10k.toFixed(2)}</td>
+                  <td className={`${cell} text-right whitespace-nowrap font-bold text-teal-700 num`}>{r.score_per_10k.toFixed(2)}</td>
                   <td className={`${cell} text-right whitespace-nowrap num`}>{r.gain_per_10k == null ? '—' : r.gain_per_10k.toFixed(2)}</td>
                   {onToggle && (
                     <td className={`${cell} text-right whitespace-nowrap`}>
@@ -71,7 +71,7 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false, de
                         <button
                           data-testid={`toggle-${r.action_id}`}
                           onClick={() => onToggle(s, true)}
-                          className="bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-100 transition whitespace-nowrap"
+                          className="bg-white text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-slate-50 transition whitespace-nowrap"
                         >
                           Mark unavailable
                         </button>
@@ -133,7 +133,7 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false, de
                       <button
                         data-testid={`toggle-${e.action_id}`}
                         onClick={() => onToggle(s, false)}
-                        className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition whitespace-nowrap"
+                        className="bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-teal-100 transition whitespace-nowrap"
                       >
                         Mark available
                       </button>

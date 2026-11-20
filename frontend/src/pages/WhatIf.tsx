@@ -6,7 +6,7 @@ import { useAppState } from '../lib/store';
 import { bits, hypColor, hypIds, hypLabel, inr, pct } from '../lib/format';
 import { normalise } from '../lib/bayes';
 import { BeliefChart } from '../components/BeliefChart';
-import { Caption, Card, CardHeader, ErrorBox, PageTitle, Spinner, Stat, btn } from '../components/ui';
+import { Card, CardHeader, ErrorBox, PageTitle, Spinner, Stat, btn } from '../components/ui';
 
 export default function WhatIf() {
   const { meta } = useAppState();
@@ -54,11 +54,7 @@ export default function WhatIf() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        an interactive Bayes calculator for Q&amp;A. Pick an investigation and the outcome you imagine it returns; the posterior is computed live with Bayes' rule: P(h | y) is proportional to P(y | h) · P(h).
-        You can also change the starting belief.
-      </Caption>
-      <PageTitle title="What-if: play the evidence yourself" subtitle="Same likelihood tables the agent uses" />
+      <PageTitle description="Pick an investigation and an outcome, and watch Bayes' rule update the beliefs." title="What-if: play the evidence yourself" meta="Same likelihood tables the agent uses" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <Card className="p-5 space-y-5">
@@ -70,7 +66,7 @@ export default function WhatIf() {
                   key={a.id}
                   data-testid={`whatif-action-${a.id}`}
                   onClick={() => setActionId(a.id)}
-                  className={`w-full text-left rounded-xl border px-3 py-2 text-sm transition ${a.id === actionId ? 'border-emerald-500 bg-emerald-50 ring-1 ring-emerald-400' : 'border-slate-200 hover:bg-slate-50'}`}
+                  className={`w-full text-left rounded-xl border px-3 py-2 text-sm transition ${a.id === actionId ? 'border-teal-500 bg-teal-50 ring-1 ring-teal-400' : 'border-slate-200 hover:bg-slate-50'}`}
                 >
                   <div className="font-semibold">{a.label}</div>
                   <div className="text-xs text-slate-500">
@@ -129,13 +125,13 @@ export default function WhatIf() {
           {u && result && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Stat label="P(this outcome)" value={pct(u.outcome_probability, 1)} sub="Σ_h P(y|h)·P(h)" tone="blue" />
+                <Stat label="P(this outcome)" value={pct(u.outcome_probability, 1)} sub="Σ_h P(y|h)·P(h)" tone="teal" />
                 <Stat label="Entropy before" value={bits(u.entropy_before)} />
-                <Stat label="Entropy after" value={bits(u.entropy_after)} tone={u.entropy_after < u.entropy_before ? 'emerald' : 'amber'} />
-                <Stat label="EIG of this action" value={bits(result.eig_bits)} sub="expected, before seeing the outcome" tone="emerald" />
+                <Stat label="Entropy after" value={bits(u.entropy_after)} tone={u.entropy_after < u.entropy_before ? 'green' : 'amber'} />
+                <Stat label="EIG of this action" value={bits(result.eig_bits)} sub="expected, before seeing the outcome" tone="teal" />
               </div>
               <Card>
-                <CardHeader title="Belief before → after" subtitle="Grey = prior, colour = posterior" icon={<FlaskConical className="w-5 h-5 text-violet-600" />} />
+                <CardHeader title="Belief before → after" subtitle="Grey = prior, colour = posterior" icon={<FlaskConical className="w-5 h-5 text-slate-600" />} />
                 <div className="p-4" data-testid="whatif-result">
                   <BeliefChart key={`${actionId}-${outcomeId}`} belief={u.posterior} before={u.prior} height={240} />
                 </div>
@@ -144,7 +140,7 @@ export default function WhatIf() {
                 <CardHeader title="All possible outcomes of this action" />
                 <div className="p-4 grid md:grid-cols-3 gap-3">
                   {result.outcomes.map((o) => (
-                    <div key={o.outcome_id} className={`rounded-xl border p-3 text-sm ${o.outcome_id === outcomeId ? 'border-emerald-400 bg-emerald-50' : 'border-slate-200'}`}>
+                    <div key={o.outcome_id} className={`rounded-xl border p-3 text-sm ${o.outcome_id === outcomeId ? 'border-teal-400 bg-teal-50' : 'border-slate-200'}`}>
                       <div className="font-semibold">{o.label}</div>
                       <div className="text-slate-500 text-xs">P = {pct(o.probability, 1)} · H after = {bits(o.entropy_after)}</div>
                       <ul className="mt-2 space-y-0.5">

@@ -6,7 +6,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Link } from 'react-router-dom';
 import type { CaseSummary, Facility, Observation, Wind } from '../types/api';
-import { fmtDate, hypColor, kgh, STATUS_META } from '../lib/format';
+import { fmtDate, hypColor, hypIds, hypLabel, kgh, STATUS_META } from '../lib/format';
 
 interface Props {
   facility: Facility;
@@ -16,7 +16,18 @@ interface Props {
   wind?: Wind | null;
   height?: number | string;
   zoom?: number;
+  legend?: boolean;
 }
+
+// Light basemap. CARTO Positron now needs an API key, so by default we use OpenStreetMap tiles with a
+// light-grey CSS filter (index.css: .pp-light-tiles), which gives the same calm look with no key.
+// To use CARTO (or any other tile server), set VITE_MAP_TILE_URL in frontend/.env at build time, e.g.
+//   VITE_MAP_TILE_URL=https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?api_key=YOUR_KEY
+const CUSTOM_TILES = (import.meta.env.VITE_MAP_TILE_URL as string | undefined) || '';
+const TILE_URL = CUSTOM_TILES || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const TILE_ATTRIBUTION = CUSTOM_TILES
+  ? '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  : '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 function windIcon(fromDeg: number): L.DivIcon {
   // Arrow points in the direction the wind blows TO (from + 180°).
@@ -27,8 +38,8 @@ function windIcon(fromDeg: number): L.DivIcon {
     iconAnchor: [32, 32],
     html: `<div style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;">
       <svg width="54" height="54" viewBox="0 0 54 54" style="transform:rotate(${to}deg)">
-        <circle cx="27" cy="27" r="25" fill="rgba(15,23,42,0.75)"/>
-        <path d="M27 8 L37 26 L30 24 L30 45 L24 45 L24 24 L17 26 Z" fill="#38bdf8"/>
+        <circle cx="27" cy="27" r="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+        <path d="M27 8 L37 26 L30 24 L30 45 L24 45 L24 24 L17 26 Z" fill="#334155"/>
       </svg></div>`,
   });
 }
@@ -41,7 +52,7 @@ function Recenter({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-export function SiteMap({ facility, observations, highlightIds = [], cases = [], wind, height = 420, zoom = 15 }: Props) {
+export function SiteMap({ facility, observations, highlightIds = [], cases = [], wind, height = 420, zoom = 15, legend = true }: Props) {
   const highlight = new Set(highlightIds);
   const caseStatus = cases[0]?.status;
   const statusHex = caseStatus ? STATUS_META[caseStatus]?.hex ?? '#0f172a' : '#0f172a';
@@ -52,9 +63,9 @@ export function SiteMap({ facility, observations, highlightIds = [], cases = [],
 
   return (
     <div style={{ height }} className="w-full relative z-0" data-testid="site-map">
-      <MapContainer center={[facility.lat, facility.lng]} zoom={zoom} style={{ height: '100%', width: '100%', background: '#e2e8f0' }} scrollWheelZoom={false}>
+      <MapContainer center={[facility.lat, facility.lng]} zoom={zoom} style={{ height: '100%', width: '100%', background: '#f8fafc' }} scrollWheelZoom={false}>
         <Recenter lat={facility.lat} lng={facility.lng} />
-        <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer attribution={TILE_ATTRIBUTION} url={TILE_URL} maxZoom={19} className={CUSTOM_TILES ? '' : 'pp-light-tiles'} />
         {facility.boundary.length > 0 && (
           <Polygon positions={facility.boundary} pathOptions={{ color: statusHex, weight: 3, fillOpacity: 0.04, dashArray: '6 4' }}>
             <Tooltip sticky>
@@ -77,9 +88,9 @@ export function SiteMap({ facility, observations, highlightIds = [], cases = [],
               center={[o.lat, o.lng]}
               radius={hi ? r * 1.15 : r}
               pathOptions={{
-                color: hi ? '#dc2626' : '#991b1b',
+                color: hi ? '#0f766e' : '#115e59',
                 weight: hi ? 4 : 2,
-                fillColor: o.label === 'REAL DATA' ? '#ef4444' : '#f59e0b',
+                fillColor: o.label === 'REAL DATA' ? '#0d9488' : '#94a3b8',
                 fillOpacity: hi ? 0.6 : 0.4,
               }}
             >
@@ -94,7 +105,7 @@ export function SiteMap({ facility, observations, highlightIds = [], cases = [],
                   <div className="font-bold">{o.label}</div>
                   {o.notes && <div className="text-slate-500">{o.notes}</div>}
                   {o.case_id && (
-                    <Link to={`/cases/${o.case_id}`} className="inline-block mt-1 bg-emerald-600 text-white px-2 py-1 rounded font-semibold">
+                    <Link to={`/cases/${o.case_id}`} className="inline-block mt-1 bg-teal-600 text-white px-2 py-1 rounded font-semibold">
                       Open case {o.case_id}
                     </Link>
                   )}
@@ -112,6 +123,22 @@ export function SiteMap({ facility, observations, highlightIds = [], cases = [],
           </Marker>
         )}
       </MapContainer>
+      {legend && (
+        // Simple legend (bottom-left). Zones and boundary are illustrative; plumes are real Carbon Mapper data.
+        <div className="absolute bottom-3 left-3 z-[400] rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-teal-600/60 border-2 border-teal-800" /> Methane plume (larger = higher rate)
+          </div>
+          {hypIds().map((h) => (
+            <div key={h} className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-sm" style={{ background: hypColor(h), opacity: 0.6 }} /> {hypLabel(h)} zone
+            </div>
+          ))}
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-0 border-t-2 border-dashed" style={{ borderColor: statusHex }} /> Site boundary (case status)
+          </div>
+        </div>
+      )}
     </div>
   );
 }

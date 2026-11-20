@@ -25,8 +25,8 @@ const PURPOSE_LABEL: Record<string, string> = {
 
 const STATUS_CLS: Record<string, string> = {
   PENDING: 'bg-amber-100 text-amber-900 border-amber-300',
-  APPROVED: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  EDITED: 'bg-sky-100 text-sky-800 border-sky-300',
+  APPROVED: 'bg-teal-100 text-teal-800 border-teal-300',
+  EDITED: 'bg-slate-100 text-slate-800 border-slate-300',
   REJECTED: 'bg-red-100 text-red-800 border-red-300',
 };
 
@@ -42,17 +42,17 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false, 
   return (
     <div
       data-testid="approval-card"
-      className={`rounded-2xl border-2 bg-white ${compact ? 'p-4' : 'p-5'} shadow-sm ${highlight && pending ? 'border-violet-400 animate-glow' : 'border-slate-200'}`}
+      className={`rounded-xl border-2 bg-white ${compact ? 'p-4' : 'p-5'} shadow-sm ${highlight && pending ? 'border-teal-500 ring-4 ring-teal-100' : 'border-slate-200'}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <UserCheck className="w-5 h-5 text-violet-600" />
-          <span className="text-xs font-bold uppercase tracking-wider text-violet-700">
+          <UserCheck className="w-5 h-5 text-teal-600" />
+          <span className="text-xs font-bold uppercase tracking-wider text-teal-700">
             {pending ? 'Human approval required' : 'Decision recorded'}
           </span>
-          <Chip className="bg-violet-50 text-violet-800 border-violet-200">{APPROVAL_KIND_LABEL[item.kind] ?? item.kind}</Chip>
+          <Chip className="bg-teal-50 text-teal-800 border-teal-200">{APPROVAL_KIND_LABEL[item.kind] ?? item.kind}</Chip>
           {purpose && PURPOSE_LABEL[purpose] && PURPOSE_LABEL[purpose] !== APPROVAL_KIND_LABEL[item.kind] && (
-            <Chip className="bg-white text-violet-800 border-violet-200">{PURPOSE_LABEL[purpose]}</Chip>
+            <Chip className="bg-white text-teal-800 border-teal-200">{PURPOSE_LABEL[purpose]}</Chip>
           )}
           {sendsText && (
             <Chip className="bg-amber-50 text-amber-900 border-amber-300 font-bold">SIMULATED: sending is simulated</Chip>
@@ -65,7 +65,7 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false, 
       <p title={compact ? item.summary : undefined} className={`text-sm text-slate-700 mt-1 ${compact ? 'line-clamp-2' : ''}`}>{item.summary}</p>
 
       {compact && item.proposed_text && !editing && (
-        <button className="mt-2 text-xs font-semibold text-violet-700 underline" onClick={() => setShowDraft((v) => !v)}>
+        <button className="mt-2 text-xs font-semibold text-teal-700 underline" onClick={() => setShowDraft((v) => !v)}>
           {showDraft ? 'Hide drafted text' : 'Show drafted text'}
         </button>
       )}
@@ -76,7 +76,7 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false, 
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={8}
-              className="w-full font-mono text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-violet-500 bg-slate-50"
+              className="w-full font-mono text-xs p-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50"
             />
           ) : (
             <pre className="whitespace-pre-wrap text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3 max-h-48 overflow-auto font-sans">

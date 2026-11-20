@@ -1,8 +1,11 @@
 // Formatting helpers and colour maps shared by every page.
 import type { ApprovalKind, CaseStatus, DataLabel, MetaResponse } from '../types/api';
 
+// One number style everywhere: international grouping (1,600 · ₹25,000), 2-dp bits, whole-number %.
+const LOCALE = 'en-US';
+
 export const inr = (n: number | null | undefined): string =>
-  n == null ? '—' : `₹${Math.round(n).toLocaleString('en-IN')}`;
+  n == null ? '—' : `₹${Math.round(n).toLocaleString(LOCALE)}`;
 
 export const pct = (p: number | null | undefined, digits = 0): string =>
   p == null ? '—' : `${(p * 100).toFixed(digits)}%`;
@@ -11,10 +14,10 @@ export const bits = (b: number | null | undefined, digits = 2): string =>
   b == null ? '—' : `${b.toFixed(digits)} bits`;
 
 export const num = (n: number | null | undefined, digits = 0): string =>
-  n == null ? '—' : n.toLocaleString('en-IN', { maximumFractionDigits: digits, minimumFractionDigits: digits });
+  n == null ? '—' : n.toLocaleString(LOCALE, { maximumFractionDigits: digits, minimumFractionDigits: digits });
 
 export const kgh = (n: number | null | undefined): string =>
-  n == null ? '—' : `${Math.round(n).toLocaleString('en-IN')} kg/h`;
+  n == null ? '—' : `${Math.round(n).toLocaleString(LOCALE)} kg/h`;
 
 export function fmtDate(iso: string | null | undefined): string {
   if (!iso) return '—';
@@ -25,9 +28,9 @@ export function fmtDate(iso: string | null | undefined): string {
 
 // ---------- hypotheses (registry filled from /api/meta) ----------
 const DEFAULT_HYP: Record<string, { label: string; color: string }> = {
-  waste_surface: { label: 'Exposed waste surface', color: '#f59e0b' },
-  gas_collection: { label: 'Gas-collection system', color: '#10b981' },
-  flare: { label: 'Flare system', color: '#6366f1' },
+  waste_surface: { label: 'Exposed waste surface', color: '#64748b' }, // slate-500
+  gas_collection: { label: 'Gas-collection system', color: '#0d9488' }, // teal-600 (accent)
+  flare: { label: 'Flare system', color: '#5eead4' }, // teal-300
 };
 let hypRegistry: Record<string, { label: string; color: string }> = { ...DEFAULT_HYP };
 export const HYP_ORDER = ['waste_surface', 'gas_collection', 'flare'];
@@ -35,7 +38,8 @@ export const HYP_ORDER = ['waste_surface', 'gas_collection', 'flare'];
 export function registerMeta(meta: MetaResponse | null): void {
   if (!meta) return;
   const reg: Record<string, { label: string; color: string }> = {};
-  meta.hypotheses.forEach((h) => (reg[h.id] = { label: h.label, color: h.color }));
+  // Labels come from the API; colours stay on the UI palette so charts match the design system.
+  meta.hypotheses.forEach((h) => (reg[h.id] = { label: h.label, color: DEFAULT_HYP[h.id]?.color ?? '#94a3b8' }));
   hypRegistry = { ...DEFAULT_HYP, ...reg };
 }
 export const hypLabel = (id: string | null | undefined): string =>
@@ -44,31 +48,33 @@ export const hypColor = (id: string): string => hypRegistry[id]?.color ?? '#6474
 export const hypIds = (): string[] => HYP_ORDER.filter((h) => h in hypRegistry);
 
 // ---------- statuses ----------
+// Status colours: amber = pending / in progress, green = verified, red = leaking / recurring, slate = neutral.
+const PENDING = { cls: 'bg-amber-50 text-amber-800 border-amber-200', hex: '#d97706' };
 export const STATUS_META: Record<CaseStatus, { label: string; cls: string; hex: string }> = {
-  OPEN: { label: 'Open', cls: 'bg-sky-100 text-sky-800 border-sky-200', hex: '#0284c7' },
-  SOURCE_ATTRIBUTION_PENDING: { label: 'Source Attribution Pending', cls: 'bg-orange-100 text-orange-800 border-orange-200', hex: '#ea580c' },
-  INVESTIGATION_REQUESTED: { label: 'Investigation Requested', cls: 'bg-amber-100 text-amber-800 border-amber-200', hex: '#d97706' },
-  REPAIR_REPORTED: { label: 'Repair Reported', cls: 'bg-violet-100 text-violet-800 border-violet-200', hex: '#7c3aed' },
-  VERIFICATION_PENDING: { label: 'Verification Pending', cls: 'bg-yellow-100 text-yellow-800 border-yellow-300', hex: '#ca8a04' },
-  VERIFIED_REDUCTION: { label: 'Verified Reduction', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200', hex: '#059669' },
-  INCONCLUSIVE: { label: 'Inconclusive', cls: 'bg-slate-200 text-slate-800 border-slate-300', hex: '#475569' },
-  STILL_LEAKING: { label: 'Still Leaking', cls: 'bg-red-100 text-red-800 border-red-200', hex: '#dc2626' },
-  RECURRING: { label: 'Recurring (reopened)', cls: 'bg-red-100 text-red-800 border-red-300', hex: '#b91c1c' },
+  OPEN: { label: 'Open', cls: 'bg-slate-100 text-slate-700 border-slate-200', hex: '#64748b' },
+  SOURCE_ATTRIBUTION_PENDING: { label: 'Source Attribution Pending', ...PENDING },
+  INVESTIGATION_REQUESTED: { label: 'Investigation Requested', ...PENDING },
+  REPAIR_REPORTED: { label: 'Repair Reported', ...PENDING },
+  VERIFICATION_PENDING: { label: 'Verification Pending', ...PENDING },
+  VERIFIED_REDUCTION: { label: 'Verified Reduction', cls: 'bg-green-50 text-green-800 border-green-200', hex: '#16a34a' },
+  INCONCLUSIVE: { label: 'Inconclusive', cls: 'bg-slate-100 text-slate-700 border-slate-300', hex: '#64748b' },
+  STILL_LEAKING: { label: 'Still Leaking', cls: 'bg-red-50 text-red-700 border-red-200', hex: '#dc2626' },
+  RECURRING: { label: 'Recurring (reopened)', cls: 'bg-red-50 text-red-700 border-red-200', hex: '#dc2626' },
 };
 export const statusLabel = (s: string): string => STATUS_META[s as CaseStatus]?.label ?? s;
 
-// ---------- provenance labels ----------
+// ---------- provenance labels (always visible; distinguished by style, not by extra colours) ----------
 export const LABEL_CLS: Record<DataLabel, string> = {
-  'REAL DATA': 'bg-blue-100 text-blue-800 border-blue-300',
-  'AGENT ACTION': 'bg-emerald-50 text-emerald-800 border-emerald-300',
-  'SIMULATED EVENT': 'bg-amber-100 text-amber-900 border-amber-300',
-  'HUMAN DECISION': 'bg-violet-100 text-violet-800 border-violet-300',
+  'REAL DATA': 'bg-teal-600 text-white border-teal-600',
+  'AGENT ACTION': 'bg-slate-100 text-slate-700 border-slate-300',
+  'SIMULATED EVENT': 'bg-white text-slate-700 border-slate-400 border-dashed',
+  'HUMAN DECISION': 'bg-slate-800 text-white border-slate-800',
 };
 export const LABEL_DOT: Record<DataLabel, string> = {
-  'REAL DATA': 'bg-blue-600',
-  'AGENT ACTION': 'bg-emerald-600',
-  'SIMULATED EVENT': 'bg-amber-500',
-  'HUMAN DECISION': 'bg-violet-600',
+  'REAL DATA': 'bg-teal-600',
+  'AGENT ACTION': 'bg-slate-400',
+  'SIMULATED EVENT': 'bg-white border border-dashed border-slate-500',
+  'HUMAN DECISION': 'bg-slate-800',
 };
 
 export const APPROVAL_KIND_LABEL: Record<ApprovalKind, string> = {
@@ -79,10 +85,10 @@ export const APPROVAL_KIND_LABEL: Record<ApprovalKind, string> = {
 };
 
 export const VERDICT_META: Record<string, { label: string; cls: string }> = {
-  VERIFIED_REDUCTION: { label: 'VERIFIED REDUCTION', cls: 'bg-emerald-600 text-white' },
+  VERIFIED_REDUCTION: { label: 'VERIFIED REDUCTION', cls: 'bg-green-600 text-white' },
   INCONCLUSIVE: { label: 'INCONCLUSIVE', cls: 'bg-slate-600 text-white' },
   STILL_LEAKING: { label: 'STILL LEAKING', cls: 'bg-red-600 text-white' },
-  NO_INDEPENDENT_EVIDENCE: { label: 'NO INDEPENDENT EVIDENCE: STAYS VERIFICATION PENDING', cls: 'bg-amber-500 text-slate-950' },
+  NO_INDEPENDENT_EVIDENCE: { label: 'NO INDEPENDENT EVIDENCE: STAYS VERIFICATION PENDING', cls: 'bg-amber-500 text-white' },
 };
 
 export const RESOURCE_LABEL: Record<string, string> = {

@@ -6,9 +6,9 @@ import { api, errMsg } from '../lib/api';
 import { useApi } from '../lib/hooks';
 import { showToast, useAppState } from '../lib/store';
 import { fmtDate, hypLabel, inr, num } from '../lib/format';
-import { Caption, Card, CardHeader, Chip, ErrorBox, PageTitle, Spinner, Stat, btn } from '../components/ui';
+import { Card, CardHeader, Chip, ErrorBox, PageTitle, Spinner, Stat, btn } from '../components/ui';
 
-const POLICY_COLOR: Record<string, string> = { A: '#94a3b8', B: '#f59e0b', C: '#10b981', C_noplan: '#6366f1' };
+const POLICY_COLOR: Record<string, string> = { A: '#cbd5e1', B: '#94a3b8', C: '#0d9488', C_noplan: '#5eead4' } // slate-300, slate-400, teal-600 (PlumeProof), teal-300;
 const SHORT: Record<string, string> = { A: 'A: Alert-only', B: 'B: Checklist', C: 'C: PlumeProof', C_noplan: 'C-ablation (planner off)' };
 
 /** Accept either 0–1 fractions or 0–100 percentages from the backend. */
@@ -87,13 +87,9 @@ export default function Evaluation() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        the proof slide. 25 seeded scenarios, each with a hidden true source, run through three policies (alert-only, fixed checklist, PlumeProof) plus an ablation and a
-        ±20% likelihood sensitivity test. <strong>All results are computed by running the simulator; nothing is typed in.</strong> Scenarios are simulated.
-      </Caption>
-      <PageTitle
+      <PageTitle description="Three policies on the same 25 simulated scenarios. Every number is computed by the simulator."
         title="Evaluation: 25 simulated scenarios"
-        subtitle={r ? `Generated ${fmtDate(r.generated_at)} · seed ${r.seed} · ${r.n_scenarios} scenarios` : 'Running the simulator…'}
+        meta={r ? `Generated ${fmtDate(r.generated_at)} · seed ${r.seed} · ${r.n_scenarios} scenarios` : 'Running the simulator…'}
         right={
           <div className="flex items-center gap-2">
             <label className="text-sm text-slate-600 flex items-center gap-1">
@@ -113,15 +109,15 @@ export default function Evaluation() {
       {r && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Stat label="PlumeProof false closures" value={`${C?.false_closures ?? '—'} / ${r.n_scenarios}`} sub="target: zero" tone="emerald" />
+            <Stat label="PlumeProof false closures" value={`${C?.false_closures ?? '—'} / ${r.n_scenarios}`} sub="target: zero" tone="teal" />
             <Stat label="Checklist false closures" value={`${B?.false_closures ?? '—'} / ${r.n_scenarios}`} sub="closes on repair claims" tone="red" />
             <Stat
               label="Source-ID inspections / case"
               value={`${num(C?.attribution_inspections_per_case, 2)} vs ${num(B?.attribution_inspections_per_case, 2)}`}
               sub="PlumeProof vs checklist"
-              tone="blue"
+              tone="teal"
             />
-            <Stat label="PlumeProof traceability" value={`${num(C ? asPct(C.traceability_pct) : null, 0)}%`} sub="critical decisions with evidence + approval" tone="amber" />
+            <Stat label="PlumeProof traceability" value={`${num(C ? asPct(C.traceability_pct) : null, 0)}%`} sub="critical decisions with evidence + approval" tone="teal" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -173,7 +169,7 @@ export default function Evaluation() {
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-right num">
                   {r.policies.map((p) => (
-                    <tr key={p.policy_id} className={p.policy_id === 'C' ? 'bg-emerald-50/60 font-semibold' : ''}>
+                    <tr key={p.policy_id} className={p.policy_id === 'C' ? 'bg-teal-50/60 font-semibold' : ''}>
                       <td className="py-2 px-2 text-left">
                         <div className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-full" style={{ background: POLICY_COLOR[p.policy_id] }} />
@@ -182,7 +178,7 @@ export default function Evaluation() {
                         <div className="text-xs text-slate-500 font-normal ">{p.description}</div>
                       </td>
                       <td className="py-2 px-2 whitespace-nowrap">{p.closed_cases}</td>
-                      <td className={`py-2 px-2 whitespace-nowrap font-bold ${p.false_closures === 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                      <td className={`py-2 px-2 whitespace-nowrap font-bold ${p.false_closures === 0 ? 'text-teal-700' : 'text-red-700'}`}>
                         {p.false_closures} ({num(asPct(p.false_closure_rate), 0)}%)
                       </td>
                       <td className="py-2 px-2 whitespace-nowrap">{p.resolved_cases}</td>
@@ -202,12 +198,12 @@ export default function Evaluation() {
 
           <Card className="p-5" data-testid="sensitivity">
             <h3 className="font-bold flex items-center gap-2">
-              <FlaskConical className="w-5 h-5 text-violet-600" /> Sensitivity: every likelihood perturbed by ±{num(asPct(r.sensitivity.perturbation), 0)}% ({r.sensitivity.n_draws} draws)
+              <FlaskConical className="w-5 h-5 text-slate-600" /> Sensitivity: every likelihood perturbed by ±{num(asPct(r.sensitivity.perturbation), 0)}% ({r.sensitivity.n_draws} draws)
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-              <Stat label="Top action unchanged" value={`${num(asPct(r.sensitivity.top_action_stability_pct), 0)}%`} sub="of perturbed draws" tone="emerald" />
+              <Stat label="Top action unchanged" value={`${num(asPct(r.sensitivity.top_action_stability_pct), 0)}%`} sub="of perturbed draws" tone="teal" />
               <Stat label="Mean Kendall τ" value={num(r.sensitivity.mean_kendall_tau, 2)} sub="1 = identical ranking" />
-              <Stat label="C false closures (perturbed worlds)" value={r.sensitivity.c_false_closures_perturbed} sub="evidence gate still holds" tone={r.sensitivity.c_false_closures_perturbed === 0 ? 'emerald' : 'red'} />
+              <Stat label="C false closures (perturbed worlds)" value={r.sensitivity.c_false_closures_perturbed} sub="evidence gate still holds" tone={r.sensitivity.c_false_closures_perturbed === 0 ? 'green' : 'red'} />
               <Stat label="C insp./resolved (perturbed)" value={num(r.sensitivity.c_inspections_per_resolved_perturbed, 2)} />
             </div>
             <div className="flex flex-wrap gap-2 mt-3 text-sm">
@@ -259,7 +255,7 @@ export default function Evaluation() {
                             if (!o) return <td key={p.policy_id} />;
                             return (
                               <td key={p.policy_id} className="py-2 px-4">
-                                <span className={`text-xs font-semibold ${o.false_closure ? 'text-red-700' : o.resolved ? 'text-emerald-700' : 'text-slate-600'}`}>
+                                <span className={`text-xs font-semibold ${o.false_closure ? 'text-red-700' : o.resolved ? 'text-teal-700' : 'text-slate-600'}`}>
                                   {o.false_closure ? '✗ false closure' : o.final_status.replace(/_/g, ' ').toLowerCase()}
                                 </span>
                                 <div className="text-[11px] text-slate-500">

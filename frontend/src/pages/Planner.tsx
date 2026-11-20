@@ -6,7 +6,7 @@ import { useApi } from '../lib/hooks';
 import { bumpData, showToast, useAppState } from '../lib/store';
 import { bits, hypLabel, inr, RESOURCE_LABEL } from '../lib/format';
 import { PlanTable } from '../components/PlanTable';
-import { Caption, Card, CardHeader, Chip, ErrorBox, PageTitle, Spinner, btn } from '../components/ui';
+import { Card, CardHeader, Chip, ErrorBox, PageTitle, Spinner, btn } from '../components/ui';
 
 export default function Planner() {
   const { meta, offline } = useAppState();
@@ -90,13 +90,9 @@ export default function Planner() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        the agent's ranking of the next investigation. It is not "most information first" but <strong>information per rupee and per day</strong>: score = EIG / (cost + λ·time).
-        Scores change with λ; the ranking is robust across 0–20,000 ₹/day. Use <strong>Mark unavailable</strong> to see the agent re-rank.
-      </Caption>
-      <PageTitle
+      <PageTitle description="The next investigation, ranked by information gained per rupee and per day."
         title="Evidence Planner"
-        subtitle="Expected information gain (EIG) from Bayesian likelihood tables P(outcome | source, action)"
+        meta="Expected information gain (EIG) from Bayesian likelihood tables P(outcome | source, action)"
         right={
           (cases.data?.length ?? 0) > 1 ? (
             <select value={caseId} onChange={(e) => setCaseId(e.target.value)} className="border border-slate-300 rounded-xl px-3 py-2 font-semibold bg-white">
@@ -111,23 +107,23 @@ export default function Planner() {
       />
 
       {top && (
-        <div className="rounded-2xl bg-emerald-600 text-white p-5 shadow flex flex-col md:flex-row md:items-center justify-between gap-3" data-testid="top-pick">
+        <div className="rounded-xl bg-teal-600 text-white p-5 shadow flex flex-col md:flex-row md:items-center justify-between gap-3" data-testid="top-pick">
           <div>
-            <p className="text-xs uppercase tracking-widest font-bold text-emerald-100">Top recommended action</p>
-            <p className="text-2xl font-extrabold">{top.label}</p>
+            <p className="text-xs uppercase tracking-widest font-bold text-teal-100">Top recommended action</p>
+            <p className="text-2xl font-bold">{top.label}</p>
           </div>
           <div className="text-right text-sm">
             <div className="font-bold text-lg">
               {bits(top.eig_bits)} for {inr(top.cost_inr)} + {top.time_days} day{top.time_days === 1 ? '' : 's'}
             </div>
-            <div className="text-emerald-100">{top.gain_per_10k != null ? `${top.gain_per_10k.toFixed(2)} bits per ₹10,000` : 'free, but slow'}</div>
+            <div className="text-teal-100">{top.gain_per_10k != null ? `${top.gain_per_10k.toFixed(2)} bits per ₹10,000` : 'free, but slow'}</div>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-5">
         <Card className="xl:col-span-3">
-          <CardHeader title="Ranked investigation actions" subtitle="Click a row to see its possible outcomes and resulting beliefs" icon={<Sparkles className="w-5 h-5 text-emerald-600" />} />
+          <CardHeader title="Ranked investigation actions" subtitle="Click a row to see its possible outcomes and resulting beliefs" icon={<Sparkles className="w-5 h-5 text-teal-600" />} />
           <div className="p-4">
             {plan.loading && !p && <Spinner />}
             {plan.error && <ErrorBox error={plan.error} onRetry={plan.reload} />}
@@ -147,11 +143,11 @@ export default function Planner() {
               step={250}
               value={lamInput ?? 1000}
               onChange={(e) => setLamInput(Number(e.target.value))}
-              className="w-full mt-3 accent-emerald-600"
+              className="w-full mt-3 accent-teal-600"
             />
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">₹0</span>
-              <span className="font-extrabold text-emerald-700 num">{inr(lamInput ?? 1000)} / day</span>
+              <span className="font-bold text-teal-700 num">{inr(lamInput ?? 1000)} / day</span>
               <span className="text-slate-400">₹20,000</span>
             </div>
             {p && (
@@ -160,7 +156,7 @@ export default function Planner() {
                 {p.ranked.map((r) => (
                   <div key={r.action_id} className="flex justify-between gap-2">
                     <span className="truncate">#{r.rank} {r.label}</span>
-                    <span className="font-bold text-emerald-700 num whitespace-nowrap">{r.score_per_10k.toFixed(3)}</span>
+                    <span className="font-bold text-teal-700 num whitespace-nowrap">{r.score_per_10k.toFixed(3)}</span>
                   </div>
                 ))}
                 <p className="text-xs text-slate-500 mt-1">The order holds across the whole range: the ranking is robust to λ.</p>
@@ -183,7 +179,7 @@ export default function Planner() {
                   disabled={!constraints || saving || offline}
                   checked={constraints?.granted_authorisations.includes('site_access_permit') ?? false}
                   onChange={(e) => toggleFlag('permit', e.target.checked)}
-                  className="w-4 h-4 accent-emerald-600"
+                  className="w-4 h-4 accent-teal-600"
                 />
                 Site access permit granted (human authorisation)
               </label>
@@ -231,7 +227,7 @@ export default function Planner() {
         <div className="p-5 space-y-4">
           {p && <p className="text-[15px] text-slate-800 whitespace-pre-line leading-relaxed" data-testid="plan-explanation">{p.explanation}</p>}
           {p && maxEig && top && maxEig.action_id !== top.action_id && (
-            <div className="rounded-xl bg-blue-50/60 border border-blue-100 p-4 text-sm text-blue-950">
+            <div className="rounded-xl bg-slate-50/60 border border-slate-100 p-4 text-sm text-slate-950">
               <strong>Why the most informative action isn't first:</strong> "{maxEig.label}" has the highest EIG ({bits(maxEig.eig_bits)}) but costs {inr(maxEig.cost_inr)} and takes {maxEig.time_days} days,
               so its score is {maxEig.score_per_10k.toFixed(2)} vs {top.score_per_10k.toFixed(2)} for "{top.label}". Current leading hypothesis:{' '}
               {hypLabel(Object.entries(p.belief).sort((a, b) => b[1] - a[1])[0]?.[0])}.
@@ -243,7 +239,7 @@ export default function Planner() {
             </button>
             {explain && (
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <Chip className={explain.mode === 'llm' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-slate-200 text-slate-700 border-slate-300'}>
+                <Chip className={explain.mode === 'llm' ? 'bg-teal-100 text-teal-800 border-teal-200' : 'bg-slate-200 text-slate-700 border-slate-300'}>
                   {explain.mode === 'llm' ? `Drafted by ${explain.model ?? 'Claude'}` : 'Template mode (no API key)'}
                 </Chip>
                 <p className="mt-2 text-sm text-slate-800 whitespace-pre-line">{explain.text}</p>

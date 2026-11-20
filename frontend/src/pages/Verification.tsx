@@ -4,7 +4,7 @@ import type { Measurement, VerificationResult } from '../types/api';
 import { api, errMsg } from '../lib/api';
 import { VERDICT_META } from '../lib/format';
 import { IntervalChart } from '../components/IntervalChart';
-import { Caption, Card, ErrorBox, LabelChip, PageTitle, btn } from '../components/ui';
+import { Card, ErrorBox, LabelChip, PageTitle, btn } from '../components/ui';
 
 interface PostForm { rate: number; u: number; independent: boolean; comparable: boolean }
 interface Form { preRate: number; preU: number; preComparable: boolean; posts: PostForm[] }
@@ -60,11 +60,7 @@ export default function Verification() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        the evidence-gated closure rule. A case is a <strong>Verified Reduction</strong> only if the post-intervention interval lies entirely below the pre-intervention interval
-        (post + u &lt; pre − u), with independent measurements under comparable conditions. A repair claim alone is never enough.
-      </Caption>
-      <PageTitle title="Mitigation verification" subtitle="Rule: post + u_post < pre − u_pre · conflicting measurements → Inconclusive" right={<LabelChip label="SIMULATED EVENT" />} />
+      <PageTitle description="A case closes only if the post-repair interval lies entirely below the pre-repair interval." title="Mitigation verification" meta="Rule: post + u_post < pre − u_pre · conflicting measurements → Inconclusive" right={<LabelChip label="SIMULATED EVENT" />} />
 
       <div className="flex flex-wrap gap-2">
         {PRESETS.map((p) => (
@@ -96,7 +92,7 @@ export default function Verification() {
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" checked={form.preComparable} onChange={(e) => setForm({ ...form, preComparable: e.target.checked })} className="w-4 h-4 accent-emerald-600" />
+            <input type="checkbox" checked={form.preComparable} onChange={(e) => setForm({ ...form, preComparable: e.target.checked })} className="w-4 h-4 accent-teal-600" />
             Pre measurement taken under comparable conditions (wind, method)
           </label>
 
@@ -121,11 +117,11 @@ export default function Verification() {
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="checkbox" checked={p.independent} onChange={(e) => setPost(i, { independent: e.target.checked })} className="w-4 h-4 accent-emerald-600" />
+                <input type="checkbox" checked={p.independent} onChange={(e) => setPost(i, { independent: e.target.checked })} className="w-4 h-4 accent-teal-600" />
                 Independently measured (not an operator self-report)
               </label>
               <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="checkbox" checked={p.comparable} onChange={(e) => setPost(i, { comparable: e.target.checked })} className="w-4 h-4 accent-emerald-600" />
+                <input type="checkbox" checked={p.comparable} onChange={(e) => setPost(i, { comparable: e.target.checked })} className="w-4 h-4 accent-teal-600" />
                 Comparable conditions
               </label>
             </div>
@@ -140,40 +136,40 @@ export default function Verification() {
           </button>
         </Card>
 
-        <Card className="bg-slate-900 text-white border-slate-800 p-6 flex flex-col">
-          <h3 className="font-bold text-slate-300 mb-4">Verification outcome</h3>
+        <Card className="p-6 flex flex-col">
+          <h3 className="font-semibold text-slate-900 mb-4">Verification outcome</h3>
           {error && <ErrorBox error={error} />}
           {result ? (
             <div className="space-y-4" data-testid="verdict">
-              <div className={`p-4 rounded-xl font-black text-center text-xl tracking-tight ${VERDICT_META[result.verdict]?.cls}`} data-testid="verdict-label">
+              <div className={`p-4 rounded-xl font-bold text-center text-xl tracking-tight ${VERDICT_META[result.verdict]?.cls}`} data-testid="verdict-label">
                 {VERDICT_META[result.verdict]?.label ?? result.verdict}
               </div>
-              <ul className="text-sm text-slate-200 space-y-1 bg-slate-800/80 p-4 rounded-xl border border-slate-700 list-disc pl-8">
+              <ul className="text-sm text-slate-700 space-y-1 bg-slate-50 p-4 rounded-lg border border-slate-200 list-disc pl-8">
                 {result.reasons.map((r, i) => (
                   <li key={i}>{r}</li>
                 ))}
               </ul>
-              <div className="grid grid-cols-2 gap-2 text-sm text-slate-300">
+              <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
                 <span>Pre lower bound (pre − u)</span>
-                <span className="font-mono text-white text-right">{Math.round(result.pre_low).toLocaleString("en-IN")} kg/h</span>
+                <span className="font-semibold text-slate-900 text-right num">{Math.round(result.pre_low).toLocaleString('en-US')} kg/h</span>
                 <span>Post upper bound (post + u)</span>
-                <span className="font-mono text-white text-right">{result.post_high != null ? `${Math.round(result.post_high).toLocaleString("en-IN")} kg/h` : '—'}</span>
+                <span className="font-semibold text-slate-900 text-right num">{result.post_high != null ? `${Math.round(result.post_high).toLocaleString('en-US')} kg/h` : '—'}</span>
                 {result.recurrence_threshold_kg_h != null && (
                   <>
                     <span>Recurrence threshold</span>
-                    <span className="font-mono text-white text-right">{Math.round(result.recurrence_threshold_kg_h).toLocaleString("en-IN")} kg/h</span>
+                    <span className="font-semibold text-slate-900 text-right num">{Math.round(result.recurrence_threshold_kg_h).toLocaleString('en-US')} kg/h</span>
                   </>
                 )}
               </div>
-              <div className="bg-white rounded-xl p-2">
+              <div className="rounded-lg border border-slate-200 p-2">
                 <IntervalChart result={result} posts={usedPosts} />
               </div>
-              <p className="text-xs text-slate-400">{result.rule}</p>
+              <p className="text-xs text-slate-500">{result.rule}</p>
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center text-center text-sm text-slate-400 italic">Pick a preset or click "Run verification engine".</div>
           )}
-          <p className="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400 italic">
+          <p className="mt-6 pt-4 border-t border-slate-200 text-xs text-slate-500 italic">
             Rule enforced: a repair-completion notification alone never closes a case. Independent post-intervention measurements are required.
           </p>
         </Card>

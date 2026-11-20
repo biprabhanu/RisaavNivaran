@@ -28,9 +28,9 @@ export function IntervalChart({ result, posts = [], height }: { result: Verifica
   }
   const colour = (k: Row['kind']) => {
     if (k === 'pre') return '#64748b';
-    if (k === 'ignored') return '#fbbf24';
-    if (result.verdict === 'VERIFIED_REDUCTION') return '#10b981';
-    if (result.verdict === 'STILL_LEAKING') return '#ef4444';
+    if (k === 'ignored') return '#f59e0b';
+    if (result.verdict === 'VERIFIED_REDUCTION') return '#16a34a';
+    if (result.verdict === 'STILL_LEAKING') return '#dc2626';
     return '#94a3b8';
   };
   const max = Math.max(...rows.map((r) => r.range[1])) * 1.15;
@@ -42,7 +42,7 @@ export function IntervalChart({ result, posts = [], height }: { result: Verifica
           <XAxis type="number" domain={[0, Math.ceil(max / 100) * 100]} tick={{ fontSize: 13 }} unit=" kg/h" />
           <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 13, fill: '#0f172a' }} />
           <Tooltip formatter={(v: [number, number] | number) => (Array.isArray(v) ? `${Math.round(v[0])}–${Math.round(v[1])} kg/h` : v)} />
-          <ReferenceLine x={result.pre_low} stroke="#dc2626" strokeDasharray="6 4" strokeWidth={2} label={{ value: `pre − u = ${Math.round(result.pre_low)}`, position: 'top', fill: '#dc2626', fontSize: 12, fontWeight: 700 }} />
+          <ReferenceLine x={result.pre_low} stroke="#0f172a" strokeDasharray="6 4" strokeWidth={2} label={{ value: `pre − u = ${Math.round(result.pre_low)}`, position: 'top', fill: '#0f172a', fontSize: 12, fontWeight: 700 }} />
           <Bar dataKey="range" barSize={22} radius={6} animationDuration={900}>
             {rows.map((r, i) => (
               <Cell key={i} fill={colour(r.kind)} />

@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Globe } from 'lucide-react';
 import { api } from '../lib/api';
 import { useApi } from '../lib/hooks';
-import { fmtDate, hypColor, hypIds, hypLabel, kgh, pct, STATUS_META } from '../lib/format';
+import { fmtDate, hypLabel, kgh, pct } from '../lib/format';
 import { SiteMap } from '../components/SiteMap';
-import { Caption, Card, CardHeader, ErrorBox, LabelChip, PageTitle, Spinner, Stat, StatusPill, btn } from '../components/ui';
-import type { CaseStatus, Observation } from '../types/api';
+import { Card, CardHeader, ErrorBox, LabelChip, PageTitle, Spinner, Stat, StatusPill, btn } from '../components/ui';
+import type { Observation } from '../types/api';
 
 /** e.g. "two plumes combined (3 Apr 2026)" for the combined 2026 observation. */
 function peakSub(o: Observation): string {
@@ -19,17 +19,13 @@ export default function MapPage() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        the Kanjur landfill with its illustrative source zones (coloured by hypothesis). Red circles are real Carbon Mapper plumes, sized by emission rate; the
-        dashed boundary is coloured by the case status; the arrow shows an illustrative wind direction.
-      </Caption>
-      <PageTitle title="Monitoring map" subtitle="Mumbai region · Kanjur landfill (≈19.13 N, 72.93 E)" />
+      <PageTitle description="Real satellite plumes over the Kanjur landfill, with illustrative source zones." title="Monitoring map" meta="Mumbai region · Kanjur landfill (≈19.13 N, 72.93 E)" />
       {loading && !data && <Spinner />}
       {error && <ErrorBox error={error} onRetry={reload} />}
       {data && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Stat label="Plume observations" value={data.observations.length} sub="Carbon Mapper (real)" tone="blue" />
+            <Stat label="Plume observations" value={data.observations.length} sub="Carbon Mapper (real)" tone="teal" />
             <Stat label="Peak emission rate" value={kgh(peak?.rate_kg_h ?? 0)} sub={peak ? peakSub(peak) : '—'} tone="red" />
             <Stat label="Active cases" value={data.cases.length} sub={data.cases.map((c) => c.id).join(', ') || '—'} />
             <Stat
@@ -42,34 +38,18 @@ export default function MapPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <Card className="lg:col-span-2 overflow-hidden">
-              <CardHeader title="Geospatial view" icon={<Globe className="w-5 h-5 text-blue-600" />} right={<LabelChip label="REAL DATA" />} />
+              <CardHeader title="Geospatial view" icon={<Globe className="w-5 h-5 text-slate-600" />} right={<LabelChip label="REAL DATA" />} />
               <SiteMap facility={data.facility} observations={data.observations} cases={data.cases} wind={data.wind} height={520} />
             </Card>
             <div className="space-y-5">
               <Card className="p-5">
-                <h3 className="font-bold mb-3">Legend</h3>
-                <div className="space-y-2 text-sm">
-                  {hypIds().map((h) => (
-                    <div key={h} className="flex items-center gap-2">
-                      <span className="w-4 h-4 rounded" style={{ background: hypColor(h), opacity: 0.6 }} /> {hypLabel(h)} zone
-                    </div>
-                  ))}
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-red-500/50 border-2 border-red-800" /> Satellite plume (marker size scales with √rate)
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-slate-900 text-sky-400 text-[10px] flex items-center justify-center">↑</span> Wind: {data.wind.label}
-                    {data.wind.illustrative && <span className="text-xs text-amber-700 font-semibold">(illustrative)</span>}
-                  </div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 pt-2">Boundary colour = case status</p>
-                  <div className="flex flex-wrap gap-1">
-                    {(Object.keys(STATUS_META) as CaseStatus[]).map((s) => (
-                      <span key={s} className="text-[11px] px-1.5 py-0.5 rounded border font-semibold" style={{ borderColor: STATUS_META[s].hex, color: STATUS_META[s].hex }}>
-                        {STATUS_META[s].label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                <h3 className="font-semibold text-slate-900 mb-3">About this map</h3>
+                <ul className="space-y-2 text-sm text-slate-600">
+                  <li><span className="font-medium text-slate-900">Plumes</span> are real Carbon Mapper observations; positions are approximate.</li>
+                  <li><span className="font-medium text-slate-900">Zones</span> are illustrative areas for each source hypothesis.</li>
+                  <li><span className="font-medium text-slate-900">Boundary</span> colour shows the case status (amber pending · green verified · red recurring).</li>
+                  <li><span className="font-medium text-slate-900">Wind</span>: {data.wind.label}.</li>
+                </ul>
               </Card>
               <Card className="p-5">
                 <h3 className="font-bold mb-3">Observations</h3>
@@ -120,7 +100,7 @@ export default function MapPage() {
                         {hypLabel(c.leading_hypothesis)} ({pct(c.leading_probability)})
                       </td>
                       <td className="py-3 px-5">
-                        <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${c.priority === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-orange-100 text-orange-800'}`}>{c.priority}</span>
+                        <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${c.priority === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}`}>{c.priority}</span>
                       </td>
                       <td className="py-3 px-5">
                         <StatusPill status={c.status} />

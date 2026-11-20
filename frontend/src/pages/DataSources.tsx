@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle, Upload } from 'lucide-react';
 import type { CaseDetail } from '../types/api';
 import { api, errMsg } from '../lib/api';
 import { bumpData, showToast, useAppState } from '../lib/store';
-import { Caption, Card, CardHeader, LabelChip, PageTitle, btn } from '../components/ui';
+import { Card, CardHeader, LabelChip, PageTitle, btn } from '../components/ui';
 
 const SAMPLE = {
   observation_id: 'OBS-SAMPLE-01',
@@ -48,11 +48,7 @@ export default function DataSources() {
 
   return (
     <div className="space-y-5">
-      <Caption>
-        where data comes from. Real plume observations come from the Carbon Mapper open data portal; you can also upload an observation as JSON, and the agent validates it and
-        opens a new case. Sample uploads are <strong>simulated</strong>.
-      </Caption>
-      <PageTitle title="Data sources & ingestion" subtitle="Validate coordinates, timestamps and units; tag provenance on every record" />
+      <PageTitle description="Where the data comes from, and how a new observation is validated and turned into a case." title="Data sources & ingestion" meta="Validate coordinates, timestamps and units; tag provenance on every record" />
 
       <div className="grid md:grid-cols-3 gap-4">
         {[
@@ -83,7 +79,7 @@ export default function DataSources() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={JSON.stringify(SAMPLE, null, 2)}
-              className="w-full font-mono text-xs p-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50"
+              className="w-full font-mono text-xs p-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-50"
             />
             <div className="flex gap-2">
               <button className={btn.ghost} onClick={() => setText(JSON.stringify(SAMPLE, null, 2))}>
@@ -94,7 +90,7 @@ export default function DataSources() {
               </button>
             </div>
             {created && (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm">
+              <div className="rounded-xl border border-teal-300 bg-teal-50 p-3 text-sm">
                 Case <strong>{created.case.id}</strong> created.{' '}
                 <Link className="underline font-semibold" to={`/cases/${created.case.id}`}>
                   Open it →
@@ -102,7 +98,7 @@ export default function DataSources() {
               </div>
             )}
           </div>
-          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-between">
+          <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 flex flex-col justify-between">
             <div className="space-y-3">
               <h3 className="font-bold text-sm">Pipeline validation standards</h3>
               <ul className="space-y-2 text-sm text-slate-600">
@@ -114,7 +110,7 @@ export default function DataSources() {
                   'Provenance tagging on every record (REAL DATA vs SIMULATED)',
                 ].map((x) => (
                   <li key={x} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" /> {x}
+                    <CheckCircle className="w-4 h-4 text-teal-600 shrink-0" /> {x}
                   </li>
                 ))}
               </ul>

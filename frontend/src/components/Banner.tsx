@@ -1,49 +1,32 @@
-// Full-width dramatic banners for the replay's key moments.
+// Full-width banners for the replay's key moments.
+// "Closure rejected" and "Case reopened" are the two show-stopper moments: they are always big and solid red.
+// Other banners (verified, warning, info) stay smaller so the step's main visual remains above the fold.
 import type { ReactNode } from 'react';
 import { AlertTriangle, CheckCircle2, Info, RotateCcw, XCircle } from 'lucide-react';
 import type { Banner as BannerT } from '../types/api';
 
-const STYLES: Record<BannerT['kind'], { cls: string; icon: ReactNode; testid: string }> = {
-  rejected: {
-    cls: 'bg-red-600 text-white border-red-800 animate-reject',
-    icon: <XCircle className="w-14 h-14 shrink-0" />,
-    testid: 'banner-rejected',
-  },
-  verified: {
-    cls: 'bg-emerald-600 text-white border-emerald-800',
-    icon: <CheckCircle2 className="w-14 h-14 shrink-0" />,
-    testid: 'banner-verified',
-  },
-  reopened: {
-    cls: 'bg-gradient-to-r from-red-600 to-orange-500 text-white border-red-800 animate-shake',
-    icon: <RotateCcw className="w-14 h-14 shrink-0" />,
-    testid: 'banner-reopened',
-  },
-  warning: {
-    cls: 'bg-amber-400 text-slate-950 border-amber-600',
-    icon: <AlertTriangle className="w-12 h-12 shrink-0" />,
-    testid: 'banner-warning',
-  },
-  info: {
-    cls: 'bg-slate-800 text-white border-slate-900',
-    icon: <Info className="w-10 h-10 shrink-0" />,
-    testid: 'banner-info',
-  },
+const STYLES: Record<BannerT['kind'], { cls: string; icon: ReactNode; testid: string; big: boolean }> = {
+  rejected: { cls: 'bg-red-600 text-white animate-reject', icon: <XCircle />, testid: 'banner-rejected', big: true },
+  reopened: { cls: 'bg-red-600 text-white animate-shake', icon: <RotateCcw />, testid: 'banner-reopened', big: true },
+  verified: { cls: 'bg-green-600 text-white', icon: <CheckCircle2 />, testid: 'banner-verified', big: false },
+  warning: { cls: 'bg-amber-50 text-amber-900 border border-amber-300', icon: <AlertTriangle />, testid: 'banner-warning', big: false },
+  info: { cls: 'bg-white text-slate-800 border border-slate-200', icon: <Info />, testid: 'banner-info', big: false },
 };
 
 export function Banner({ banner, compact = false }: { banner: BannerT; compact?: boolean }) {
   const s = STYLES[banner.kind] ?? STYLES.info;
+  const big = s.big; // show-stoppers ignore `compact`
   return (
     <div
       key={banner.title}
       data-testid={s.testid}
-      className={`rounded-2xl border-2 flex items-center shadow-xl ${compact ? 'px-5 py-3 gap-4' : 'px-6 py-5 gap-5'} ${s.cls}`}
       role="alert"
+      className={`w-full rounded-xl flex items-center ${big ? 'px-8 py-6 gap-6 shadow-lg' : compact ? 'px-5 py-3 gap-4' : 'px-6 py-4 gap-4'} ${s.cls}`}
     >
-      <span className={compact ? '[&>svg]:w-10 [&>svg]:h-10 shrink-0' : 'shrink-0'}>{s.icon}</span>
+      <span className={`shrink-0 ${big ? '[&>svg]:w-14 [&>svg]:h-14' : '[&>svg]:w-8 [&>svg]:h-8'}`}>{s.icon}</span>
       <div className="min-w-0">
-        <p className={`${compact ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'} font-black tracking-tight uppercase leading-tight`}>{banner.title}</p>
-        <p className={`${compact ? 'text-sm md:text-base mt-0.5' : 'text-base md:text-lg mt-1'} opacity-95 font-medium`}>{banner.text}</p>
+        <p className={`${big ? 'text-3xl md:text-4xl font-extrabold uppercase tracking-tight' : 'text-lg md:text-xl font-bold'} leading-tight`}>{banner.title}</p>
+        <p className={`${big ? 'text-lg md:text-xl mt-1.5 font-medium' : 'text-sm md:text-base mt-0.5'} opacity-95`}>{banner.text}</p>
       </div>
     </div>
   );
