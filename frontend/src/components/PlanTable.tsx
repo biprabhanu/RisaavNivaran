@@ -58,19 +58,19 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false }: 
                       <span className="ml-7 text-xs font-semibold text-amber-700">re-ranked: was #{was}</span>
                     )}
                   </td>
-                  <td className={`${cell} text-right font-semibold num`}>{bits(r.eig_bits)}</td>
-                  <td className={`${cell} text-right num`}>{inr(r.cost_inr)}</td>
-                  <td className={`${cell} text-right num`}>{num(r.time_days)} d</td>
-                  {!compact && <td className={`${cell} text-right num text-slate-600`}>{inr(r.effective_cost)}</td>}
-                  <td className={`${cell} text-right font-extrabold text-emerald-700 num`}>{r.score_per_10k.toFixed(2)}</td>
-                  <td className={`${cell} text-right num`}>{r.gain_per_10k == null ? '—' : r.gain_per_10k.toFixed(2)}</td>
+                  <td className={`${cell} text-right whitespace-nowrap font-semibold num`}>{bits(r.eig_bits)}</td>
+                  <td className={`${cell} text-right whitespace-nowrap num`}>{inr(r.cost_inr)}</td>
+                  <td className={`${cell} text-right whitespace-nowrap num`}>{num(r.time_days)} d</td>
+                  {!compact && <td className={`${cell} text-right whitespace-nowrap num text-slate-600`}>{inr(r.effective_cost)}</td>}
+                  <td className={`${cell} text-right whitespace-nowrap font-extrabold text-emerald-700 num`}>{r.score_per_10k.toFixed(2)}</td>
+                  <td className={`${cell} text-right whitespace-nowrap num`}>{r.gain_per_10k == null ? '—' : r.gain_per_10k.toFixed(2)}</td>
                   {onToggle && (
-                    <td className={`${cell} text-right`}>
+                    <td className={`${cell} text-right whitespace-nowrap`}>
                       {s && s.resources.length > 0 ? (
                         <button
                           data-testid={`toggle-${r.action_id}`}
                           onClick={() => onToggle(s, true)}
-                          className="bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-100 transition"
+                          className="bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-100 transition whitespace-nowrap"
                         >
                           Mark unavailable
                         </button>
@@ -120,17 +120,17 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false }: 
                     ))}
                   </div>
                 </td>
-                <td className={`${cell} text-right text-slate-400 line-through num`}>{bits(e.eig_bits)}</td>
-                <td className={`${cell} text-right text-slate-400`} colSpan={compact ? 4 : 5}>
+                <td className={`${cell} text-right whitespace-nowrap text-slate-400 line-through num`}>{bits(e.eig_bits)}</td>
+                <td className={`${cell} text-right whitespace-nowrap text-slate-400`} colSpan={compact ? 4 : 5}>
                   excluded before ranking
                 </td>
                 {onToggle && (
-                  <td className={`${cell} text-right`}>
+                  <td className={`${cell} text-right whitespace-nowrap`}>
                     {s && s.resources.length > 0 && e.reason_codes.includes('RESOURCE_UNAVAILABLE') ? (
                       <button
                         data-testid={`toggle-${e.action_id}`}
                         onClick={() => onToggle(s, false)}
-                        className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition"
+                        className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition whitespace-nowrap"
                       >
                         Mark available
                       </button>

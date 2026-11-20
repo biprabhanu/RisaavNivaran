@@ -28,8 +28,8 @@ export function LifecycleStepper({ status }: { status: CaseStatus }) {
     );
   };
   return (
-    <div className="flex flex-col xl:flex-row xl:items-center gap-2" data-testid="lifecycle">
-      <div className="flex flex-wrap items-center gap-1">
+    <div className="flex flex-col gap-2" data-testid="lifecycle">
+      <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {MAIN.map((s, i) => (
           <div key={s} className="flex items-center gap-1">
             {pill(s, i, true)}
@@ -37,9 +37,11 @@ export function LifecycleStepper({ status }: { status: CaseStatus }) {
           </div>
         ))}
       </div>
-      <ChevronRight className="hidden xl:block w-5 h-5 text-slate-400" />
-      <div className="flex flex-wrap items-center gap-1 rounded-xl border border-dashed border-slate-300 p-1">
-        {OUTCOMES.map((s, i) => pill(s, i, false))}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Outcome →</span>
+        <div className="flex flex-wrap items-center gap-1 rounded-xl border border-dashed border-slate-300 p-1">
+          {OUTCOMES.map((s, i) => pill(s, i, false))}
+        </div>
       </div>
     </div>
   );

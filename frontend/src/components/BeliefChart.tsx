@@ -29,7 +29,7 @@ export function BeliefChart({ belief, before, height = 220, showEntropy = true }
               <LabelList dataKey="before" position="right" formatter={(v: number) => `${v.toFixed(0)}%`} style={{ fontSize: 12, fill: '#94a3b8' }} />
             </Bar>
           )}
-          <Bar dataKey="now" name={before ? 'After update' : 'P(source)'} radius={[0, 6, 6, 0]} animationDuration={1200}>
+          <Bar dataKey="now" name={before ? 'After update (colour = hypothesis)' : 'P(source)'} fill="#10b981" radius={[0, 6, 6, 0]} animationDuration={1200}>
             {data.map((d) => (
               <Cell key={d.id} fill={hypColor(d.id)} />
             ))}

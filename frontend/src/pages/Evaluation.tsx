@@ -9,14 +9,16 @@ import { fmtDate, hypLabel, inr, num } from '../lib/format';
 import { Caption, Card, CardHeader, Chip, ErrorBox, PageTitle, Spinner, Stat, btn } from '../components/ui';
 
 const POLICY_COLOR: Record<string, string> = { A: '#94a3b8', B: '#f59e0b', C: '#10b981', C_noplan: '#6366f1' };
-const SHORT: Record<string, string> = { A: 'A: Alert-only', B: 'B: Checklist', C: 'C: PlumeProof', C_noplan: 'C − planner' };
+const SHORT: Record<string, string> = { A: 'A: Alert-only', B: 'B: Checklist', C: 'C: PlumeProof', C_noplan: 'C-ablation (planner off)' };
 
 /** Accept either 0–1 fractions or 0–100 percentages from the backend. */
 const asPct = (v: number) => (v <= 1.0001 ? v * 100 : v);
 
-function MetricChart({ title, subtitle, data, unit = '', digits = 1, testid, help }: {
+function MetricChart({ title, subtitle, data, unit = '', digits = 1, testid, help, note, format }: {
   title: string; subtitle?: string; data: { id: string; value: number | null }[]; unit?: string; digits?: number; testid?: string; help?: string;
+  note?: string; format?: (v: number) => string;
 }) {
+  const fmt = format ?? ((v: number) => `${v.toFixed(digits)}${unit}`);
   const rows = data.map((d) => ({ name: SHORT[d.id] ?? d.id, id: d.id, value: d.value ?? 0, missing: d.value == null }));
   return (
     <Card data-testid={testid}>
@@ -30,8 +32,8 @@ function MetricChart({ title, subtitle, data, unit = '', digits = 1, testid, hel
           <BarChart data={rows} margin={{ top: 24, right: 12, left: 0, bottom: 4 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="name" tick={{ fontSize: 12, fill: '#0f172a' }} interval={0} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(v: number) => `${v.toFixed(digits)}${unit}`} />
+            <YAxis tick={{ fontSize: 12 }} tickFormatter={format ? (v: number) => fmt(v) : undefined} width={format ? 78 : 40} />
+            <Tooltip formatter={(v: number) => fmt(v)} />
             <Bar dataKey="value" radius={[6, 6, 0, 0]} animationDuration={900}>
               {rows.map((r) => (
                 <Cell key={r.id} fill={POLICY_COLOR[r.id] ?? '#64748b'} />
@@ -39,12 +41,13 @@ function MetricChart({ title, subtitle, data, unit = '', digits = 1, testid, hel
               <LabelList
                 dataKey="value"
                 position="top"
-                formatter={(v: number) => `${v.toFixed(digits)}${unit}`}
+                formatter={(v: number) => fmt(v)}
                 style={{ fontSize: 13, fontWeight: 700, fill: '#0f172a' }}
               />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        {note && <p className="text-sm text-slate-700 px-2 font-medium">{note}</p>}
         {help && <p className="text-xs text-slate-500 px-2">{help}</p>}
       </div>
     </Card>
@@ -128,6 +131,7 @@ export default function Evaluation() {
               subtitle="Cases closed without independent evidence of a reduction"
               data={series((p) => p.false_closures)}
               digits={0}
+              note="A and B close on the operator's repair claim; a claim is never independent evidence, so every such closure counts as false."
             />
             <MetricChart
               testid="chart-attribution-inspections"
@@ -143,7 +147,7 @@ export default function Evaluation() {
               digits={2}
               help="PlumeProof also pays for an independent post-repair measurement that the checklist and alert-only policies never do. That is exactly why it never closes falsely."
             />
-            <MetricChart title="Cost per resolved case (₹)" data={series((p) => p.cost_per_resolved_inr)} digits={0} />
+            <MetricChart title="Cost per resolved case (₹)" data={series((p) => p.cost_per_resolved_inr)} digits={0} format={(v) => inr(v)} />
             <MetricChart title="Days to accountable stakeholder" subtitle="Detection → responsible operator assigned" data={series((p) => p.mean_days_to_stakeholder)} digits={1} unit=" d" />
             <MetricChart title="Decision traceability (%)" subtitle="Critical decisions linked to required evidence + human approval" data={series((p) => asPct(p.traceability_pct))} digits={0} unit="%" />
           </div>
@@ -173,7 +177,7 @@ export default function Evaluation() {
                       <td className="py-3 px-4 text-left">
                         <div className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-full" style={{ background: POLICY_COLOR[p.policy_id] }} />
-                          <span className="font-bold">{p.label}</span>
+                          <span className="font-bold">{p.policy_id === 'C_noplan' ? 'C-ablation (planner off)' : p.label}</span>
                         </div>
                         <div className="text-xs text-slate-500 font-normal min-w-[280px] max-w-md">{p.description}</div>
                       </td>

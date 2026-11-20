@@ -48,7 +48,7 @@ export default function MapPage() {
                     </div>
                   ))}
                   <div className="flex items-center gap-2">
-                    <span className="w-4 h-4 rounded-full bg-red-500/50 border-2 border-red-800" /> Satellite plume (size ∝ √rate)
+                    <span className="w-4 h-4 rounded-full bg-red-500/50 border-2 border-red-800" /> Satellite plume (marker size scales with √rate)
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-4 h-4 rounded-full bg-slate-900 text-sky-400 text-[10px] flex items-center justify-center">↑</span> Wind: {data.wind.label}

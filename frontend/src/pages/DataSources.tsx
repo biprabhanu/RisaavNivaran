@@ -57,11 +57,17 @@ export default function DataSources() {
       <div className="grid md:grid-cols-3 gap-4">
         {[
           { t: 'Carbon Mapper Open Data Portal', d: 'Satellite plume observations with emission rates (Kanjur 9 Feb 2025, 3 Apr 2026).', l: 'REAL DATA' as const },
-          { t: 'UN MARS alerts', d: 'Public alert & response information. Adapter is future work.', l: 'SIMULATED EVENT' as const },
+          { t: 'UN MARS alerts', d: 'Public alert & response information. Adapter is future work.', l: null },
           { t: 'Operator records & field measurements', d: 'Simulated in this prototype; clearly labelled everywhere.', l: 'SIMULATED EVENT' as const },
         ].map((s) => (
           <Card key={s.t} className="p-5">
-            <LabelChip label={s.l} />
+            {s.l ? (
+              <LabelChip label={s.l} />
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md border text-[11px] font-bold tracking-wide bg-slate-100 text-slate-600 border-slate-300">
+                NOT INTEGRATED (future work)
+              </span>
+            )}
             <h3 className="font-bold mt-2">{s.t}</h3>
             <p className="text-sm text-slate-600 mt-1">{s.d}</p>
           </Card>

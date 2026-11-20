@@ -224,6 +224,7 @@ export const api = {
         (await loadSnapshot()).frames.map((f) => ({ index: f.step_index, id: f.step_id, title: f.title, label: f.label })),
     }),
   replayReset: () => request<ReplayFrame>('/api/replay/reset', { method: 'POST', timeoutMs: 15000 }),
+  replayCurrent: () => request<ReplayFrame>('/api/replay/current', { timeoutMs: 10000 }),
   replayStep: (body: ReplayStepRequest) => request<ReplayFrame>('/api/replay/step', { method: 'POST', body, timeoutMs: 15000 }),
   evaluationLatest: () =>
     request<EvaluationReport>('/api/evaluate/latest', {

@@ -155,13 +155,13 @@ export default function Verification() {
               </ul>
               <div className="grid grid-cols-2 gap-2 text-sm text-slate-300">
                 <span>Pre lower bound (pre − u)</span>
-                <span className="font-mono text-white text-right">{Math.round(result.pre_low)} kg/h</span>
+                <span className="font-mono text-white text-right">{Math.round(result.pre_low).toLocaleString("en-IN")} kg/h</span>
                 <span>Post upper bound (post + u)</span>
-                <span className="font-mono text-white text-right">{result.post_high != null ? `${Math.round(result.post_high)} kg/h` : '—'}</span>
+                <span className="font-mono text-white text-right">{result.post_high != null ? `${Math.round(result.post_high).toLocaleString("en-IN")} kg/h` : '—'}</span>
                 {result.recurrence_threshold_kg_h != null && (
                   <>
                     <span>Recurrence threshold</span>
-                    <span className="font-mono text-white text-right">{Math.round(result.recurrence_threshold_kg_h)} kg/h</span>
+                    <span className="font-mono text-white text-right">{Math.round(result.recurrence_threshold_kg_h).toLocaleString("en-IN")} kg/h</span>
                   </>
                 )}
               </div>

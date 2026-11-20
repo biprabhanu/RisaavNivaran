@@ -92,7 +92,7 @@ export default function Planner() {
     <div className="space-y-5">
       <Caption>
         the agent's ranking of the next investigation. It is not "most information first" but <strong>information per rupee and per day</strong>: score = EIG / (cost + λ·time).
-        Mark a resource unavailable or move λ and watch it re-rank instantly.
+        Scores change with λ; the ranking is robust across 0–20,000 ₹/day. Use <strong>Mark unavailable</strong> to see the agent re-rank.
       </Caption>
       <PageTitle
         title="Evidence Planner"
@@ -154,6 +154,18 @@ export default function Planner() {
               <span className="font-extrabold text-emerald-700 num">{inr(lamInput ?? 1000)} / day</span>
               <span className="text-slate-400">₹20,000</span>
             </div>
+            {p && (
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm" data-testid="lambda-scores">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Live scores at this λ (bits per ₹10k-equivalent)</p>
+                {p.ranked.map((r) => (
+                  <div key={r.action_id} className="flex justify-between gap-2">
+                    <span className="truncate">#{r.rank} {r.label}</span>
+                    <span className="font-bold text-emerald-700 num whitespace-nowrap">{r.score_per_10k.toFixed(3)}</span>
+                  </div>
+                ))}
+                <p className="text-xs text-slate-500 mt-1">The order holds across the whole range: the ranking is robust to λ.</p>
+              </div>
+            )}
             <button className="mt-2 text-xs text-slate-500 underline" onClick={() => setLamInput(meta?.default_lambda ?? 1000)}>
               reset to default ({inr(meta?.default_lambda ?? 1000)})
             </button>

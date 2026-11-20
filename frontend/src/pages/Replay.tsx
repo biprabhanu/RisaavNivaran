@@ -2,13 +2,13 @@
 // Each step is one backend call (POST /api/replay/step) that returns a complete ReplayFrame.
 // Offline, the same frames are read from the bundled snapshot.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Calendar, ChevronRight, Loader2, Pause, Play, RotateCcw, SkipForward, Sparkles, Wrench,
 } from 'lucide-react';
 import type { ApprovalDecision, MapState, ReplayFrame, ReplayStepInfo, ToolCall } from '../types/api';
 import { api, errMsg, loadSnapshot, OfflineError } from '../lib/api';
-import { bumpData, getState, setState, useAppState } from '../lib/store';
+import { bumpData, getState, setState, showToast, useAppState } from '../lib/store';
 import { fmtDate, LABEL_DOT } from '../lib/format';
 import { ApprovalCard } from '../components/ApprovalCard';
 import { Banner } from '../components/Banner';
@@ -24,10 +24,12 @@ const BASE_MS = 4000;
 // Keep the replay position when the user navigates to another page and comes back.
 let cachedFrame: ReplayFrame | null = null;
 let cachedTools: ToolCall[] = [];
+let cachedResetVersion = -1; // demoResetVersion the cached frame belongs to
 
 export default function Replay() {
-  const { offline, meta } = useAppState();
+  const { offline, meta, demoResetVersion } = useAppState();
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const [frame, setFrame] = useState<ReplayFrame | null>(cachedFrame);
   const [script, setScript] = useState<ReplayStepInfo[]>([]);
   const [mapState, setMapState] = useState<MapState | null>(null);
@@ -36,8 +38,11 @@ export default function Replay() {
   const [speed, setSpeed] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const autostarted = useRef(false);
+  const initDone = useRef(false);
+  const seenResetVersion = useRef(demoResetVersion);
   const busyRef = useRef(false);
+  const controlsRef = useRef<HTMLDivElement | null>(null);
+  const railRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     api.replayScript().then(setScript).catch(() => undefined);
@@ -97,10 +102,15 @@ export default function Replay() {
     }
   }, [offlineGo, show]);
 
-  const reset = useCallback(
-    () => run(() => api.replayReset(), () => 0, true),
-    [run],
-  );
+  const reset = useCallback(() => {
+    cachedResetVersion = getState().demoResetVersion;
+    return run(() => api.replayReset(), () => 0, true);
+  }, [run]);
+  /** Restore the live replay position (page reload, navigation back, after a header "Reset demo"). */
+  const loadCurrent = useCallback(() => {
+    cachedResetVersion = getState().demoResetVersion;
+    return run(() => api.replayCurrent(), () => getState().offlineFrameIndex ?? 0, true);
+  }, [run]);
   const step = useCallback(
     (autoApprove: boolean) => {
       if (cachedFrame?.done) return Promise.resolve();
@@ -113,6 +123,10 @@ export default function Replay() {
     const pa = frame?.pending_approval;
     if (!pa) return;
     if (getState().offline) {
+      if (d.decision === 'reject') {
+        showToast('Offline snapshot mode replays the recorded approvals. Reject needs the live backend.');
+        return;
+      }
       await step(true);
       return;
     }
@@ -129,29 +143,51 @@ export default function Replay() {
       setBusy(false);
     }
     if (!ok) return;
-    const prev = cachedFrame?.step_index;
-    await run(
-      async () => {
-        let f = await api.replayStep({ auto_approve: false });
-        if (f.step_index === prev) {
-          // The decision may have created a follow-up approval (e.g. attribution → notification).
-          // Show whatever is genuinely pending now instead of the stale item.
-          const pend = (await api.approvals('PENDING')).filter((a) => a.status === 'PENDING' && (!f.case || a.case_id === f.case.case.id));
-          f = { ...f, pending_approval: pend[0] ?? null };
-        }
-        return f;
-      },
-      () => (cachedFrame?.step_index ?? -1) + 1,
-    );
+    // Approve/Edit → the backend advances to the next beat. Reject → the backend returns a frame at the
+    // SAME step index ("Human rejected…") with the agent's re-proposed item; we simply render it.
+    await run(() => api.replayStep({ auto_approve: false }), () => (cachedFrame?.step_index ?? -1) + 1);
   };
 
-  // ?autostart=1 (from the landing page's "Start live demo") → reset then play.
+  // First load. "Start live demo" (/replay?autostart=1) → reset to the intro and WAIT for the presenter.
+  // The URL is then replaced with /replay so Back/refresh never resets the replay again.
+  // A plain /replay load restores the live position from the backend.
   useEffect(() => {
-    if (params.get('autostart') === '1' && !autostarted.current) {
-      autostarted.current = true;
-      reset().then(() => setPlaying(true));
+    if (initDone.current) return;
+    initDone.current = true;
+    if (params.get('autostart') === '1') {
+      navigate('/replay', { replace: true });
+      setPlaying(false);
+      reset();
+    } else if (!cachedFrame || cachedResetVersion !== getState().demoResetVersion) {
+      loadCurrent();
     }
-  }, [params, reset]);
+  }, [params, navigate, reset, loadCurrent]);
+
+  // Header "Reset demo" while on this page → restart the replay at the intro so Next starts at step 1.
+  useEffect(() => {
+    if (demoResetVersion === seenResetVersion.current) return;
+    seenResetVersion.current = demoResetVersion;
+    setPlaying(false);
+    reset();
+  }, [demoResetVersion, reset]);
+
+  // Every new frame: bring the controls, banner and approval card into view (the key moments must be
+  // visible on a projector without scrolling), and slide the progress rail to the active step.
+  const frameKey = frame ? `${frame.step_index}|${frame.title}` : '';
+  useEffect(() => {
+    if (!frameKey) return;
+    const el = controlsRef.current;
+    if (el) {
+      const header = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+      const top = el.getBoundingClientRect().top + window.scrollY - header - 12;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+    const rail = railRef.current;
+    const active = rail?.querySelector<HTMLElement>('[data-active="true"]');
+    if (rail && active) {
+      rail.scrollTo({ left: Math.max(0, active.offsetLeft - rail.clientWidth / 2 + active.clientWidth / 2), behavior: 'smooth' });
+    }
+  }, [frameKey]);
 
   // Play loop: one step per interval; dramatic frames and approvals linger a little longer.
   useEffect(() => {
@@ -181,117 +217,135 @@ export default function Replay() {
   const actions = meta?.actions;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <Caption>
         a step-by-step replay of the Kanjur landfill case. <strong>Blue = real Carbon Mapper data</strong>, <strong>amber = simulated operational events</strong>. Watch the agent
         update its beliefs, re-plan, refuse an unsupported closure, and reopen the case when emissions return.
       </Caption>
 
-      {/* Controls */}
-      <Card className="p-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="mr-auto">
-            <h1 className="text-2xl font-extrabold tracking-tight">Replay: Kanjur landfill, Mumbai, 2025–2026</h1>
-            <p className="text-sm text-slate-500">Case KJ-2025-02 · historical satellite observations + labelled simulated events</p>
-          </div>
-          <button data-testid="replay-reset" className={btn.ghost} onClick={() => { setPlaying(false); reset(); }} disabled={busy}>
-            <RotateCcw className="w-4 h-4" /> Reset
-          </button>
-          <button
-            data-testid="replay-play"
-            className={playing ? btn.dark : btn.primary}
-            onClick={() => setPlaying((p) => !p)}
-            disabled={!!frame?.done}
-          >
-            {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />} {playing ? 'Pause' : 'Play'}
-          </button>
-          <button
-            data-testid="replay-next"
-            data-busy={busy ? 'true' : 'false'}
-            className={btn.dark}
-            onClick={() => (frame ? step(true) : reset())}
-            disabled={busy || !!frame?.done}
-            title={frame?.pending_approval ? 'Next = the presenter approves the pending item' : 'Next step'}
-          >
-            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <SkipForward className="w-4 h-4" />} Next
-          </button>
-          <label className="flex items-center gap-2 text-sm text-slate-600">
-            Speed
-            <select data-testid="replay-speed" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} className="border border-slate-300 rounded-lg px-2 py-1.5 text-sm font-semibold bg-white">
-              <option value={0.5}>0.5×</option>
-              <option value={1}>1×</option>
-              <option value={2}>2×</option>
-            </select>
-          </label>
-        </div>
-
-        {/* Progress rail */}
-        {script.length > 0 && (
-          <div className="mt-4 flex items-stretch gap-1 overflow-x-auto pb-1" data-testid="replay-rail">
-            {script.filter((s) => s.index > 0).map((s) => {
-              const cur = frame?.step_index ?? -1;
-              const done = s.index < cur;
-              const active = s.index === cur;
-              return (
-                <div
-                  key={`${s.index}-${s.id}`}
-                  className={`min-w-[120px] flex-1 rounded-lg border px-2 py-1.5 text-xs transition ${
-                    active ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-400' : done ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-200 bg-white text-slate-400'
-                  }`}
-                >
-                  <div className="flex items-center gap-1 font-bold">
-                    <span className={`w-2 h-2 rounded-full ${LABEL_DOT[s.label] ?? 'bg-slate-400'}`} />
-                    {s.index}
-                  </div>
-                  <div className={`leading-tight mt-0.5 ${active ? 'text-slate-900 font-semibold' : ''}`}>{s.title}</div>
+      {/* 1. Controls + current step (always the first thing on screen after each step) */}
+      <div ref={controlsRef} className="scroll-mt-40">
+        <Card className="p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="mr-auto min-w-0">
+              <p className="text-sm font-semibold text-slate-500">
+                Replay · Kanjur landfill, Mumbai, 2025–2026 · Case KJ-2025-02
+              </p>
+              {frame ? (
+                <div className="flex flex-wrap items-center gap-2 text-sm mt-0.5">
+                  <span className="font-bold text-slate-600" data-testid="step-counter">
+                    Step {frame.step_index} / {total}
+                  </span>
+                  <LabelChip label={frame.label} />
+                  {frame.sim_date && (
+                    <span className="inline-flex items-center gap-1 text-slate-600 font-semibold">
+                      <Calendar className="w-4 h-4" /> {fmtDate(frame.sim_date)}
+                    </span>
+                  )}
+                  {frame.done && <span className="text-emerald-700 font-bold" data-testid="replay-done">Replay complete ✓</span>}
                 </div>
-              );
-            })}
+              ) : (
+                <span className="text-sm text-slate-400" data-testid="step-counter">Loading replay…</span>
+              )}
+            </div>
+            <button data-testid="replay-reset" className={btn.ghost} onClick={() => { setPlaying(false); reset(); }} disabled={busy}>
+              <RotateCcw className="w-4 h-4" /> Reset
+            </button>
+            <button
+              data-testid="replay-play"
+              className={playing ? btn.dark : btn.primary}
+              onClick={() => setPlaying((p) => !p)}
+              disabled={!!frame?.done}
+            >
+              {playing ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />} {playing ? 'Pause' : 'Play'}
+            </button>
+            <button
+              data-testid="replay-next"
+              data-busy={busy ? 'true' : 'false'}
+              className={btn.dark}
+              onClick={() => (frame ? step(true) : reset())}
+              disabled={busy || !!frame?.done}
+              title={frame?.pending_approval ? 'Next = the presenter approves the pending item' : 'Next step'}
+            >
+              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <SkipForward className="w-4 h-4" />} Next
+            </button>
+            <label className="flex items-center gap-2 text-sm text-slate-600">
+              Speed
+              <select data-testid="replay-speed" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} className="border border-slate-300 rounded-lg px-2 py-1.5 text-sm font-semibold bg-white">
+                <option value={0.5}>0.5×</option>
+                <option value={1}>1×</option>
+                <option value={2}>2×</option>
+              </select>
+            </label>
           </div>
-        )}
-      </Card>
+          {frame && (
+            <h1 key={frameKey} className="text-2xl md:text-[28px] font-extrabold tracking-tight text-slate-900 mt-2 animate-slidein" data-testid="step-title">
+              {frame.title}
+            </h1>
+          )}
+
+          {/* Progress rail (auto-scrolls to the active step) */}
+          {script.length > 0 && (
+            <div ref={railRef} className="relative mt-3 flex items-stretch gap-1 overflow-x-auto pb-1 pr-2 scroll-smooth" data-testid="replay-rail">
+              {script.filter((s) => s.index > 0).map((s) => {
+                const cur = frame?.step_index ?? -1;
+                const done = s.index < cur;
+                const active = s.index === cur;
+                return (
+                  <div
+                    key={`${s.index}-${s.id}`}
+                    data-active={active ? 'true' : 'false'}
+                    className={`min-w-[132px] flex-1 shrink-0 rounded-lg border px-2 py-1 text-xs transition ${
+                      active ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-400' : done ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-200 bg-white text-slate-400'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1 font-bold">
+                      <span className={`w-2 h-2 rounded-full ${LABEL_DOT[s.label] ?? 'bg-slate-400'}`} />
+                      {s.index}
+                    </div>
+                    <div className={`leading-tight mt-0.5 line-clamp-2 ${active ? 'text-slate-900 font-semibold' : ''}`}>{s.title}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Card>
+      </div>
 
       {error && <ErrorBox error={error} />}
 
-      {/* Dramatic banner */}
-      {frame?.banner && <Banner key={`${frame.step_index}-${frame.banner.kind}`} banner={frame.banner} />}
+      {/* 2. Dramatic banner */}
+      {frame?.banner && <Banner key={`${frameKey}-${frame.banner.kind}`} banner={frame.banner} />}
 
-      {/* Narration */}
+      {/* 3. Human approval: compact so Approve / Edit / Reject stay above the fold */}
+      {frame?.pending_approval && (
+        <ApprovalCard
+          key={frame.pending_approval.id}
+          item={frame.pending_approval}
+          onDecide={decide}
+          highlight
+          busy={busy}
+          compact
+          caseDate={frame.sim_date ?? frame.case?.case.sim_date ?? null}
+        />
+      )}
+
+      {/* 4. Narration */}
       <Card className="p-5" data-testid="narration">
         {frame ? (
-          <div key={frame.step_index} className="animate-slidein">
-            <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="font-bold text-slate-500" data-testid="step-counter">
-                Step {frame.step_index} / {total}
-              </span>
-              <LabelChip label={frame.label} />
-              {frame.sim_date && (
-                <span className="inline-flex items-center gap-1 text-slate-600 font-semibold">
-                  <Calendar className="w-4 h-4" /> {fmtDate(frame.sim_date)}
-                </span>
-              )}
-              {frame.done && <span className="ml-auto text-emerald-700 font-bold" data-testid="replay-done">Replay complete ✓</span>}
-            </div>
-            <h2 className="text-2xl font-extrabold mt-2 text-slate-900" data-testid="step-title">{frame.title}</h2>
-            <p className="text-lg text-slate-700 mt-2 leading-relaxed">{frame.narration}</p>
-          </div>
+          <p key={frameKey} className="text-lg text-slate-700 leading-relaxed animate-slidein">{frame.narration}</p>
         ) : (
-          <div className="text-center py-6">
-            <p className="text-lg text-slate-600">Press <strong>Play</strong> (or <strong>Next</strong>) to start. This resets case KJ-2025-02 and replays it from the first satellite observation.</p>
-          </div>
+          <p className="text-lg text-slate-600 text-center py-2">
+            Press <strong>Next</strong> (or <strong>Play</strong>) to start. This replays case KJ-2025-02 from the first satellite observation.
+          </p>
         )}
       </Card>
-
-      {/* Human approval */}
-      {frame?.pending_approval && (
-        <ApprovalCard key={frame.pending_approval.id} item={frame.pending_approval} onDecide={decide} highlight busy={busy} />
-      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
         {/* Left: map + tools */}
         <div className="xl:col-span-2 space-y-5">
           <Card className="overflow-hidden">
-            <CardHeader title="Monitoring map" subtitle="Plume size ∝ √(emission rate) · zones are illustrative" right={<LabelChip label="REAL DATA" />} />
+            <CardHeader title="Monitoring map" subtitle="Marker size scales with √(emission rate) · zones are illustrative" right={<LabelChip label="REAL DATA" />} />
             {facility ? (
               <SiteMap facility={facility} observations={observations} highlightIds={frame?.highlight_observation_ids} wind={mapState?.wind} height={340} />
             ) : (

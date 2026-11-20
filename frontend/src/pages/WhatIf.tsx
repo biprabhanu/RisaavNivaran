@@ -55,7 +55,7 @@ export default function WhatIf() {
   return (
     <div className="space-y-5">
       <Caption>
-        an interactive Bayes calculator for Q&amp;A. Pick an investigation and the outcome you imagine it returns; the posterior is computed live with P(h | y) ∝ P(y | h) · P(h).
+        an interactive Bayes calculator for Q&amp;A. Pick an investigation and the outcome you imagine it returns; the posterior is computed live with Bayes' rule: P(h | y) is proportional to P(y | h) · P(h).
         You can also change the starting belief.
       </Caption>
       <PageTitle title="What-if: play the evidence yourself" subtitle="Same likelihood tables the agent uses" />

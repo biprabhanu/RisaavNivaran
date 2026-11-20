@@ -10,7 +10,18 @@ interface Props {
   onDecide?: (d: ApprovalDecision) => Promise<void> | void;
   highlight?: boolean;
   busy?: boolean;
+  compact?: boolean; // replay: hide the drafted text behind a toggle so the buttons stay above the fold
+  caseDate?: string | null; // in-world date of the case (the replay runs in 2025–2026)
 }
+
+const PURPOSE_LABEL: Record<string, string> = {
+  investigation: 'Investigation request',
+  attribution: 'Source attribution',
+  corrective_action: 'Corrective-action notice',
+  notice: 'Stakeholder notice',
+  closure: 'Final closure',
+  transition: 'Status change',
+};
 
 const STATUS_CLS: Record<string, string> = {
   PENDING: 'bg-amber-100 text-amber-900 border-amber-300',
@@ -19,8 +30,11 @@ const STATUS_CLS: Record<string, string> = {
   REJECTED: 'bg-red-100 text-red-800 border-red-300',
 };
 
-export function ApprovalCard({ item, onDecide, highlight = false, busy = false }: Props) {
+export function ApprovalCard({ item, onDecide, highlight = false, busy = false, compact = false, caseDate }: Props) {
   const [editing, setEditing] = useState(false);
+  const [showDraft, setShowDraft] = useState(!compact);
+  const purpose = typeof item.payload.purpose === 'string' ? item.payload.purpose : null;
+  const sendsText = !!item.proposed_text && purpose !== 'attribution' && purpose !== 'closure';
   const [text, setText] = useState(item.edited_text ?? item.proposed_text);
   const [note, setNote] = useState('');
   const pending = item.status === 'PENDING';
@@ -37,14 +51,25 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false }
             {pending ? 'Human approval required' : 'Decision recorded'}
           </span>
           <Chip className="bg-violet-50 text-violet-800 border-violet-200">{APPROVAL_KIND_LABEL[item.kind] ?? item.kind}</Chip>
+          {purpose && PURPOSE_LABEL[purpose] && PURPOSE_LABEL[purpose] !== APPROVAL_KIND_LABEL[item.kind] && (
+            <Chip className="bg-white text-violet-800 border-violet-200">{PURPOSE_LABEL[purpose]}</Chip>
+          )}
+          {sendsText && (
+            <Chip className="bg-amber-50 text-amber-900 border-amber-300 font-bold">SIMULATED: sending is simulated</Chip>
+          )}
           <Chip className="font-mono">{item.case_id}</Chip>
         </div>
         <Chip className={STATUS_CLS[item.status]}>{item.status}</Chip>
       </div>
-      <h3 className="text-lg font-bold text-slate-900 mt-3">{item.title}</h3>
+      <h3 className={`${compact ? 'text-base mt-2' : 'text-lg mt-3'} font-bold text-slate-900`}>{item.title}</h3>
       <p className="text-sm text-slate-700 mt-1">{item.summary}</p>
 
-      {(item.proposed_text || editing) && (
+      {compact && item.proposed_text && !editing && (
+        <button className="mt-2 text-xs font-semibold text-violet-700 underline" onClick={() => setShowDraft((v) => !v)}>
+          {showDraft ? 'Hide drafted text' : 'Show drafted text'}
+        </button>
+      )}
+      {((item.proposed_text && showDraft) || editing) && (
         <div className="mt-3">
           {editing ? (
             <textarea
@@ -63,7 +88,8 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false }
 
       <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-slate-500">
         {item.evidence_ids.length > 0 && <span className="font-mono">evidence: {item.evidence_ids.join(', ')}</span>}
-        <span>· created {fmtDate(item.created_at)}</span>
+        {caseDate && <span>· case date <strong>{fmtDate(caseDate)}</strong></span>}
+        <span>· logged {fmtDate(item.created_at)}</span>
         {item.decided_by && (
           <span>
             · decided by <strong>{item.decided_by}</strong> {item.decided_at ? `(${fmtDate(item.decided_at)})` : ''}
@@ -73,7 +99,7 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false }
       </div>
 
       {pending && onDecide && (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className={`${compact ? 'mt-3' : 'mt-4'} flex flex-wrap items-center gap-2`}>
           {!editing ? (
             <>
               <button data-testid="approve-button" disabled={busy} className={btn.primary} onClick={() => onDecide({ decision: 'approve', note })}>

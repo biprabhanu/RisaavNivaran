@@ -7,7 +7,8 @@ import { LABEL_CLS, STATUS_META } from '../lib/format';
 
 export function Card({ children, className = '', ...rest }: { children: ReactNode; className?: string } & React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm ${className}`} {...rest}>
+    // A caller-supplied background (e.g. bg-slate-900 for a dark panel) replaces the default white.
+    <div className={`${/(^|\s)bg-/.test(className) ? '' : 'bg-white '}rounded-2xl border border-slate-200 shadow-sm ${className}`} {...rest}>
       {children}
     </div>
   );

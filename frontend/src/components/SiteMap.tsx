@@ -1,5 +1,5 @@
 // Leaflet map of the facility: boundary, source zones (coloured by hypothesis), plume markers
-// (size ∝ √rate), and an illustrative wind arrow. No external marker images are used.
+// (marker size scales with √rate), and an illustrative wind arrow. No external marker images are used.
 import { useEffect } from 'react';
 import { CircleMarker, MapContainer, Marker, Polygon, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';

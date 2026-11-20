@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { api, errMsg, retryOnline } from '../lib/api';
 import { useApi } from '../lib/hooks';
-import { bumpData, setState, showToast, useAppState } from '../lib/store';
+import { setState, showToast, useAppState, signalDemoReset } from '../lib/store';
 
 const NAV = [
   { to: '/', label: 'Overview', icon: Home, end: true },
@@ -39,7 +39,7 @@ export function Layout({ children }: { children: ReactNode }) {
     try {
       await api.resetDemo();
       setState({ offlineFrameIndex: null });
-      bumpData();
+      signalDemoReset();
       showToast('Demo reset: database re-seeded with the clean Kanjur case.');
     } catch (e) {
       showToast(`Reset failed: ${errMsg(e)}`);

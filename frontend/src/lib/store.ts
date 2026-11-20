@@ -8,6 +8,7 @@ export interface AppState {
   health: HealthResponse | null;
   meta: MetaResponse | null;
   dataVersion: number;
+  demoResetVersion: number; // bumped by header "Reset demo" so the Replay page restarts at the intro
   offlineFrameIndex: number | null; // which snapshot frame offline pages show (null = last)
   toast: string | null;
 }
@@ -17,6 +18,7 @@ let state: AppState = {
   health: null,
   meta: null,
   dataVersion: 0,
+  demoResetVersion: 0,
   offlineFrameIndex: null,
   toast: null,
 };
@@ -43,6 +45,11 @@ export function useAppState(): AppState {
 /** Tell every page to reload its data. */
 export function bumpData(): void {
   setState({ dataVersion: state.dataVersion + 1 });
+}
+
+/** Header "Reset demo" finished: pages with cached replay state must start over. */
+export function signalDemoReset(): void {
+  setState({ demoResetVersion: state.demoResetVersion + 1, dataVersion: state.dataVersion + 1 });
 }
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
