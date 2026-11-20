@@ -1,0 +1,62 @@
+"""The Kanjur 2025–2026 historical replay."""
+from plumeproof import db, replay
+from plumeproof.schemas import CaseStatus as S, DataLabel
+
+
+def test_full_replay(temp_db):
+    frames = replay.run_full_replay()
+    assert len(frames) == replay.TOTAL_STEPS + 1 <= 13
+    assert frames[0].case is None and frames[-1].done
+
+    by_id = {f.step_id: f for f in frames}
+    # Step 1: real observation
+    assert by_id["obs-2025"].label == DataLabel.REAL_DATA
+    assert {t.tool.value for t in by_id["obs-2025"].tool_calls} >= {"query_observations", "overlay_facility_zones"}
+    # Step 3: records request first + approval pending
+    plan = by_id["plan"].plan
+    assert plan.ranked[0].action_id == "records_request"
+    assert by_id["plan"].pending_approval is not None
+    # OGI unavailable → excluded before ranking, re-ranked
+    ogi = by_id["ogi-unavailable"]
+    assert "ogi_survey" in {e.action_id for e in ogi.plan.excluded}
+    assert "ogi_survey" in {r.action_id for r in ogi.plan_before.ranked}
+    assert ogi.banner.kind == "warning"
+    # Records: fault found → posterior ≈ gas 65 / flare 29 / waste 6
+    post = by_id["records-fault"].belief_after
+    assert abs(post["gas_collection"] - 0.65) < 0.02 and abs(post["waste_surface"] - 0.06) < 0.02
+    # Repair claim → REJECTED
+    rej = by_id["repair-claim"]
+    assert rej.banner.kind == "rejected" and "REJECTED" in rej.banner.title
+    assert rej.case.case.status == S.VERIFICATION_PENDING
+    assert any(e.type == "TRANSITION_REJECTED" for e in rej.new_events)
+    # Follow-up measurement → verified, then closure approved
+    assert by_id["follow-up"].verification.verdict.value == "VERIFIED_REDUCTION"
+    assert by_id["closure"].case.case.status == S.VERIFIED_REDUCTION
+    # 2026 real observation → reopened as recurring
+    last = frames[-1]
+    c = last.case.case
+    assert c.status == S.SOURCE_ATTRIBUTION_PENDING and c.reopen_count == 1
+    assert last.banner.kind == "reopened"
+    types = [e.type for e in last.timeline]
+    assert "CASE_REOPENED" in types
+    assert any(e.data.get("to") == "RECURRING" for e in last.timeline if e.type == "STATUS_CHANGED")
+
+
+def test_step_without_auto_approve_waits(temp_db):
+    replay.reset()
+    for _ in range(3):
+        f = replay.step()
+    assert f.pending_approval is not None
+    same = replay.step(auto_approve=False)
+    assert same.step_index == f.step_index
+    nxt = replay.step(auto_approve=True)
+    assert nxt.step_index == f.step_index + 1
+    assert any(e.label == DataLabel.HUMAN_DECISION and e.actor_name == replay.PRESENTER for e in nxt.new_events)
+
+
+def test_scratch_replay_does_not_touch_live_state(temp_db):
+    replay.reset()
+    replay.step()
+    frames = replay.frames_in_scratch_db()
+    assert len(frames) == replay.TOTAL_STEPS + 1
+    assert db.kv_get(replay.KV_KEY)["step"] == 1

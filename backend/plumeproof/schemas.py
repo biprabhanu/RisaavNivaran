@@ -544,6 +544,10 @@ class PolicyMetrics(BaseModel):
     correct_attribution_rate: float
     inspections_total: int
     inspections_per_resolved: Optional[float]
+    # Field inspections used to IDENTIFY THE SOURCE (excludes verification campaigns), mean per case.
+    # This is the PDF objective-2 metric ("inspections required to identify the emission source").
+    attribution_inspections_per_case: float = 0.0
+    verification_inspections_total: int = 0
     cost_total_inr: float
     cost_per_resolved_inr: Optional[float]
     mean_days_to_stakeholder: Optional[float]
@@ -559,6 +563,7 @@ class ScenarioPolicyOutcome(BaseModel):
     resolved: bool
     attributed_source: Optional[str]
     inspections: int
+    attribution_inspections: int = 0
     cost_inr: float
     days_to_stakeholder: Optional[float]
     days_elapsed: float

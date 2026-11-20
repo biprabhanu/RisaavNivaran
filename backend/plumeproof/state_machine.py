@@ -96,7 +96,8 @@ CLOSED_STATUSES: frozenset[CaseStatus] = frozenset({S.VERIFIED_REDUCTION})
 # Special explanation for the most important forbidden move (the demo's show-stopper).
 NO_CLAIM_CLOSURE_REASON = (
     "Closure REJECTED: no independent post-intervention measurement. "
-    "A repair-completion claim is not evidence of reduced emissions; the case stays VERIFICATION_PENDING."
+    "A repair-completion claim is not evidence of reduced emissions; the case cannot close until an independent "
+    "measurement shows a verified reduction (it moves to / stays in VERIFICATION_PENDING)."
 )
 
 
