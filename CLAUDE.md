@@ -59,7 +59,7 @@ Deterministic core, LLM at the edges: all maths and state changes live in plain 
 - Phases A–F are implemented (see docs/ROADMAP.md).
 - Backend: 128 pytest tests pass (engine, state machine, agent, replay incl. rejection handling, API, mocked LLM, evaluation). The worked example reproduces: records 0.499 bits, OGI 0.413, ground 0.914, satellite 0; P(fault) 0.433; posterior 65/29/6; no-fault waste 83.7%.
 - Evaluation (seed 2026, 25 scenarios): false closures A 25, B 25, C 0, ablation 0; source-ID inspections per case B 1.80 vs C 0.72; ±20% sensitivity keeps the top action in 100% of draws.
-- Frontend: `npm run build` and typecheck pass; 2 Playwright e2e tests pass (full replay + Reject flow); the offline snapshot fallback works. Pages are lazy-loaded (first load ~210 KB).
+- Frontend: `npm run build` and typecheck pass; 3 Playwright e2e tests pass (full replay, Reject flow, 720p projector visibility); the offline snapshot fallback works. Pages are lazy-loaded (first load ~210 KB).
 - Docker: the image builds; `docker run -p 8000:8000 plumeproof` serves the UI, `/api` and `/docs`; the DB seeds on startup.
 - Replay: 11 steps (frame 0 = intro). Step 5 is OGI unavailable, step 8 is the repair claim rejected, step 11 is the 2026 reopen; the case ends RECURRING. Start live demo does NOT autoplay. A human Reject stops the script, and the agent re-proposes the item.
 - Known limits: see the README "Honest limitations" section. The LLM path is untested against the live API (no key in the dev environment).

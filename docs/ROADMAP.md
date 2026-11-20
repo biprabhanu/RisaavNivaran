@@ -46,5 +46,5 @@
 - [x] Offline snapshot fallback in the frontend
 - [x] README rewrite (Mermaid architecture, I/O/end-user table, quickstart, deploy, limitations)
 - [x] DEMO_SCRIPT: 3-min flow, 60-s video, 10 judge Q&As
-- [ ] Verifier agent click-through + screenshots in docs/screenshots/ (in progress)
+- [x] Verifier agent click-through (2 independent rounds) + screenshots in docs/screenshots/
 - [x] (Optional) Generate-notice button with an approval step
