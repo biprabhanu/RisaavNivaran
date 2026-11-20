@@ -68,7 +68,7 @@ For Q&A: **Case → Try to close case** (guardrail), **Planner → λ slider / M
 | `slides/figures/src/make_charts.py` | JSON → chart PNGs (matplotlib) |
 | `slides/figures/src/capture.cjs`, `crop_shots.py` | Playwright screenshots at 1920×1080, and banner crops |
 | `slides/figures/src/check_consistency.py` | Checks that every number in the slides, speech and report is allowed |
-| `speech/speech_8min.md` | Word-for-word script for two speakers, timing, fallback plan, 12 Q&As |
+| `speech/speech_8min.md` (local only, not in git) | Word-for-word script for two speakers, timing, fallback plan, 12 Q&As |
 | `report/round2_report.md` / `.pdf` | 6-page technical report |
 
 **Rebuild:**

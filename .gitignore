@@ -23,3 +23,6 @@ backend/data/plumeproof.db
 .DS_Store
 .idea/
 .vscode/
+
+# Private presenter notes: kept locally, never pushed
+round2_submission/speech/
