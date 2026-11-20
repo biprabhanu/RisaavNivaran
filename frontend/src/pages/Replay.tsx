@@ -216,6 +216,90 @@ export default function Replay() {
   const total = frame?.total_steps ?? script.length;
   const actions = meta?.actions;
 
+  // Which visual is this step ABOUT? It is rendered next to the narration, above the fold.
+  const toolNames = new Set(frame?.tool_calls.map((t) => t.tool) ?? []);
+  const focus: 'plan' | 'belief' | 'verification' | 'map' | null = !frame
+    ? null
+    : frame.plan_before
+      ? 'plan'
+      : frame.belief_before
+        ? 'belief'
+        : frame.verification
+          ? 'verification'
+          : frame.step_id === 'hypotheses'
+            ? 'belief'
+            : frame.highlight_observation_ids.length > 0 || toolNames.has('query_observations')
+              ? 'map'
+              : toolNames.has('rank_actions')
+                ? 'plan'
+                : null;
+
+  const mapCard = (height: number) => (
+    <Card className="overflow-hidden">
+      <CardHeader title="Monitoring map" subtitle="Marker size scales with √(emission rate) · zones are illustrative" right={<LabelChip label="REAL DATA" />} />
+      {facility ? (
+        <SiteMap facility={facility} observations={observations} highlightIds={frame?.highlight_observation_ids} wind={mapState?.wind} height={height} />
+      ) : (
+        <div className="flex items-center justify-center text-slate-400 text-sm" style={{ height }}>Map loads with the first observation</div>
+      )}
+    </Card>
+  );
+
+  const beliefCard = (isFocus: boolean) => (
+    <Card>
+      <CardHeader
+        title="Source hypotheses: P(source | evidence)"
+        subtitle={frame?.belief_before ? 'Grey = before this step’s Bayesian update, colour = after' : 'Competing hypotheses; none is assumed true'}
+        right={<LabelChip label="AGENT ACTION" />}
+      />
+      <div className={isFocus ? 'px-4 py-2' : 'p-4'}>
+        {belief ? (
+          <BeliefChart key={frame?.step_index} belief={belief} before={frame?.belief_before} height={isFocus ? (frame?.belief_before ? 200 : 160) : 220} />
+        ) : (
+          <p className="text-sm text-slate-400 italic py-8 text-center">Hypotheses appear once the case is opened.</p>
+        )}
+      </div>
+    </Card>
+  );
+
+  const plannerCard = (isFocus: boolean) => (
+    <Card>
+      <CardHeader
+        title="Evidence Planner"
+        subtitle={isFocus ? 'score = EIG / (cost + λ·time) · excluded before ranking if a constraint is violated' : 'score = EIG / (cost + λ·time); constraint-violating actions excluded before ranking'}
+        right={frame?.plan_before ? <span className="text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 rounded-md px-2 py-1" data-testid="replanned-badge">RE-RANKED</span> : undefined}
+        icon={<Sparkles className="w-5 h-5 text-emerald-600" />}
+      />
+      <div className={isFocus ? 'px-3 py-2' : 'p-4'}>
+        {plan ? (
+          <>
+            <PlanTable plan={plan} before={frame?.plan_before} actions={actions} compact dense={isFocus} />
+            <div className="mt-3 rounded-xl bg-blue-50/60 border border-blue-100 p-3 text-sm text-blue-950 whitespace-pre-line" data-testid="plan-explanation">
+              {plan.explanation}
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-slate-400 italic py-8 text-center">The planner runs once hypotheses exist.</p>
+        )}
+      </div>
+    </Card>
+  );
+
+  const verificationCard = () =>
+    frame?.verification ? (
+      <Card>
+        <CardHeader title="Verification: uncertainty intervals" subtitle={frame.verification.rule} right={<span className="text-sm font-bold whitespace-nowrap">{frame.verification.verdict.replace(/_/g, ' ')}</span>} />
+        <div className="p-4">
+          <IntervalChart result={frame.verification} posts={c?.case.measurements ?? []} />
+          <ul className="mt-2 text-sm text-slate-700 list-disc pl-5">
+            {frame.verification.reasons.map((r, i) => (
+              <li key={i}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      </Card>
+    ) : null;
+
   return (
     <div className="space-y-4">
       <Caption>
@@ -225,14 +309,12 @@ export default function Replay() {
 
       {/* 1. Controls + current step (always the first thing on screen after each step) */}
       <div ref={controlsRef} className="scroll-mt-40">
-        <Card className="p-4">
+        <Card className="p-3">
           <div className="flex flex-wrap items-center gap-3">
             <div className="mr-auto min-w-0">
-              <p className="text-sm font-semibold text-slate-500">
-                Replay · Kanjur landfill, Mumbai, 2025–2026 · Case KJ-2025-02
-              </p>
               {frame ? (
-                <div className="flex flex-wrap items-center gap-2 text-sm mt-0.5">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-slate-500 font-semibold hidden xl:inline">Kanjur landfill · Case KJ-2025-02 ·</span>
                   <span className="font-bold text-slate-600" data-testid="step-counter">
                     Step {frame.step_index} / {total}
                   </span>
@@ -279,14 +361,19 @@ export default function Replay() {
             </label>
           </div>
           {frame && (
-            <h1 key={frameKey} className="text-2xl md:text-[28px] font-extrabold tracking-tight text-slate-900 mt-2 animate-slidein" data-testid="step-title">
+            <h1
+              key={frameKey}
+              title={frame.title}
+              className="text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 mt-1.5 truncate animate-slidein"
+              data-testid="step-title"
+            >
               {frame.title}
             </h1>
           )}
 
           {/* Progress rail (auto-scrolls to the active step) */}
           {script.length > 0 && (
-            <div ref={railRef} className="relative mt-3 flex items-stretch gap-1 overflow-x-auto pb-1 pr-2 scroll-smooth" data-testid="replay-rail">
+            <div ref={railRef} className="relative mt-2 flex items-stretch gap-1 overflow-x-auto pb-1 pr-2 scroll-smooth" data-testid="replay-rail">
               {script.filter((s) => s.index > 0).map((s) => {
                 const cur = frame?.step_index ?? -1;
                 const done = s.index < cur;
@@ -295,15 +382,16 @@ export default function Replay() {
                   <div
                     key={`${s.index}-${s.id}`}
                     data-active={active ? 'true' : 'false'}
-                    className={`min-w-[132px] flex-1 shrink-0 rounded-lg border px-2 py-1 text-xs transition ${
+                    title={s.title}
+                    className={`min-w-[120px] flex-1 shrink-0 rounded-lg border px-2 py-0.5 text-xs transition ${
                       active ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-400' : done ? 'border-slate-200 bg-slate-100 text-slate-500' : 'border-slate-200 bg-white text-slate-400'
                     }`}
                   >
-                    <div className="flex items-center gap-1 font-bold">
-                      <span className={`w-2 h-2 rounded-full ${LABEL_DOT[s.label] ?? 'bg-slate-400'}`} />
-                      {s.index}
+                    <div className={`flex items-center gap-1 leading-tight ${active ? 'text-slate-900' : ''}`}>
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${LABEL_DOT[s.label] ?? 'bg-slate-400'}`} />
+                      <span className="font-bold">{s.index}</span>
+                      <span className={`truncate ${active ? 'font-semibold' : ''}`}>{s.title}</span>
                     </div>
-                    <div className={`leading-tight mt-0.5 line-clamp-2 ${active ? 'text-slate-900 font-semibold' : ''}`}>{s.title}</div>
                   </div>
                 );
               })}
@@ -315,43 +403,47 @@ export default function Replay() {
       {error && <ErrorBox error={error} />}
 
       {/* 2. Dramatic banner */}
-      {frame?.banner && <Banner key={`${frameKey}-${frame.banner.kind}`} banner={frame.banner} />}
+      {frame?.banner && <Banner key={`${frameKey}-${frame.banner.kind}`} banner={frame.banner} compact />}
 
-      {/* 3. Human approval: compact so Approve / Edit / Reject stay above the fold */}
-      {frame?.pending_approval && (
-        <ApprovalCard
-          key={frame.pending_approval.id}
-          item={frame.pending_approval}
-          onDecide={decide}
-          highlight
-          busy={busy}
-          compact
-          caseDate={frame.sim_date ?? frame.case?.case.sim_date ?? null}
-        />
-      )}
-
-      {/* 4. Narration */}
-      <Card className="p-5" data-testid="narration">
-        {frame ? (
-          <p key={frameKey} className="text-lg text-slate-700 leading-relaxed animate-slidein">{frame.narration}</p>
-        ) : (
-          <p className="text-lg text-slate-600 text-center py-2">
-            Press <strong>Next</strong> (or <strong>Play</strong>) to start. This replays case KJ-2025-02 from the first satellite observation.
-          </p>
+      {/* 3. What happened (approval + narration) next to the ONE visual this step is about ("focus panel"),
+             so both stay above the fold on a 1280×720 projector. */}
+      <div className={`grid grid-cols-1 gap-4 ${focus ? 'lg:grid-cols-12' : ''}`}>
+        <div className={`space-y-4 min-w-0 ${focus ? (frame?.pending_approval ? 'lg:col-span-5' : 'lg:col-span-4') : ''}`}>
+          {frame?.pending_approval && (
+            <ApprovalCard
+              key={frame.pending_approval.id}
+              item={frame.pending_approval}
+              onDecide={decide}
+              highlight
+              busy={busy}
+              compact
+              caseDate={frame.sim_date ?? frame.case?.case.sim_date ?? null}
+            />
+          )}
+          <Card className="p-4" data-testid="narration">
+            {frame ? (
+              <p key={frameKey} className="text-base md:text-[17px] text-slate-700 leading-relaxed animate-slidein">{frame.narration}</p>
+            ) : (
+              <p className="text-lg text-slate-600 text-center py-2">
+                Press <strong>Next</strong> (or <strong>Play</strong>) to start. This replays case KJ-2025-02 from the first satellite observation.
+              </p>
+            )}
+          </Card>
+        </div>
+        {focus && (
+          <div className={`${frame?.pending_approval ? 'lg:col-span-7' : 'lg:col-span-8'} min-w-0`} data-testid="focus-panel" data-focus={focus}>
+            {focus === 'plan' && plannerCard(true)}
+            {focus === 'belief' && beliefCard(true)}
+            {focus === 'verification' && verificationCard()}
+            {focus === 'map' && mapCard(300)}
+          </div>
         )}
-      </Card>
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
         {/* Left: map + tools */}
         <div className="xl:col-span-2 space-y-5">
-          <Card className="overflow-hidden">
-            <CardHeader title="Monitoring map" subtitle="Marker size scales with √(emission rate) · zones are illustrative" right={<LabelChip label="REAL DATA" />} />
-            {facility ? (
-              <SiteMap facility={facility} observations={observations} highlightIds={frame?.highlight_observation_ids} wind={mapState?.wind} height={340} />
-            ) : (
-              <div className="h-[340px] flex items-center justify-center text-slate-400 text-sm">Map loads with the first observation</div>
-            )}
-          </Card>
+          {focus !== 'map' && mapCard(340)}
           <Card>
             <CardHeader title="Agent tool calls" subtitle="The agent acts by calling deterministic tools" icon={<Wrench className="w-5 h-5 text-slate-600" />} />
             <div className="p-4 space-y-2 max-h-[320px] overflow-auto" data-testid="tool-ticker">
@@ -370,54 +462,14 @@ export default function Replay() {
           </Card>
         </div>
 
-        {/* Right: beliefs + planner */}
+        {/* Right: beliefs + planner (whichever is not already the focus panel) */}
         <div className="xl:col-span-3 space-y-5">
-          <Card>
-            <CardHeader
-              title="Source hypotheses: P(source | evidence)"
-              subtitle={frame?.belief_before ? 'Grey = before this step’s Bayesian update, colour = after' : 'Competing hypotheses; none is assumed true'}
-              right={<LabelChip label="AGENT ACTION" />}
-            />
-            <div className="p-4">
-              {belief ? <BeliefChart key={frame?.step_index} belief={belief} before={frame?.belief_before} /> : <p className="text-sm text-slate-400 italic py-8 text-center">Hypotheses appear once the case is opened.</p>}
-            </div>
-          </Card>
-          <Card>
-            <CardHeader
-              title="Evidence Planner"
-              subtitle="score = EIG / (cost + λ·time); constraint-violating actions excluded before ranking"
-              right={frame?.plan_before ? <span className="text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 rounded-md px-2 py-1" data-testid="replanned-badge">RE-RANKED</span> : undefined}
-              icon={<Sparkles className="w-5 h-5 text-emerald-600" />}
-            />
-            <div className="p-4">
-              {plan ? (
-                <>
-                  <PlanTable plan={plan} before={frame?.plan_before} actions={actions} compact />
-                  <div className="mt-3 rounded-xl bg-blue-50/60 border border-blue-100 p-3 text-sm text-blue-950 whitespace-pre-line" data-testid="plan-explanation">
-                    {plan.explanation}
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-slate-400 italic py-8 text-center">The planner runs once hypotheses exist.</p>
-              )}
-            </div>
-          </Card>
+          {focus !== 'belief' && beliefCard(false)}
+          {focus !== 'plan' && plannerCard(false)}
         </div>
       </div>
 
-      {frame?.verification && (
-        <Card>
-          <CardHeader title="Verification: uncertainty intervals" subtitle={frame.verification.rule} right={<span className="text-sm font-bold">{frame.verification.verdict.replace(/_/g, ' ')}</span>} />
-          <div className="p-4">
-            <IntervalChart result={frame.verification} posts={c?.case.measurements ?? []} />
-            <ul className="mt-2 text-sm text-slate-700 list-disc pl-5">
-              {frame.verification.reasons.map((r, i) => (
-                <li key={i}>{r}</li>
-              ))}
-            </ul>
-          </div>
-        </Card>
-      )}
+      {frame?.verification && focus !== 'verification' && verificationCard()}
 
       <Card>
         <CardHeader title="Audit timeline (newest first)" subtitle="Every event: timestamp, actor, type, evidence links, provenance label" />

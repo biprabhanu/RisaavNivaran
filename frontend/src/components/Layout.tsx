@@ -51,16 +51,16 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col text-[15px]">
       {toast && (
-        <div className="fixed top-5 right-5 z-[1000] bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-slidein max-w-md" data-testid="toast">
+        <div className="fixed bottom-5 right-5 z-[1000] bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-slidein max-w-md" data-testid="toast">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
           <span className="text-sm font-medium">{toast}</span>
         </div>
       )}
 
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-[500] shadow-md">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between gap-4">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-[72px] [@media(max-height:820px)]:h-14 flex items-center justify-between gap-4">
           <NavLink to="/" className="flex items-center gap-3 min-w-0">
-            <div className="bg-emerald-500 p-2.5 rounded-xl shadow-lg shadow-emerald-500/20">
+            <div className="bg-emerald-500 p-2.5 [@media(max-height:820px)]:p-1.5 rounded-xl shadow-lg shadow-emerald-500/20">
               <ShieldAlert className="w-7 h-7 text-slate-950" />
             </div>
             <div className="min-w-0">
@@ -96,7 +96,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   to={n.to}
                   end={n.end}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 py-3 px-3 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                    `flex items-center gap-2 py-3 [@media(max-height:820px)]:py-2 px-3 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
                       isActive ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-200 hover:border-slate-700'
                     }`
                   }
@@ -113,22 +113,22 @@ export function Layout({ children }: { children: ReactNode }) {
             })}
           </div>
         </nav>
+        {offline && (
+          <div className="bg-amber-400 text-slate-950 border-b border-amber-600" data-testid="offline-banner">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3 text-sm font-semibold">
+              <WifiOff className="w-5 h-5" />
+              <span>Offline snapshot mode: backend unreachable. Showing a bundled, pre-computed snapshot (read-only).</span>
+              <button
+                className="ml-auto underline"
+                onClick={async () => showToast((await retryOnline()) ? 'Backend reconnected.' : 'Still offline.')}
+              >
+                Retry connection
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
-      {offline && (
-        <div className="bg-amber-400 text-slate-950 border-b border-amber-600" data-testid="offline-banner">
-          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3 text-sm font-semibold">
-            <WifiOff className="w-5 h-5" />
-            <span>Offline snapshot mode: backend unreachable. Showing a bundled, pre-computed snapshot (read-only).</span>
-            <button
-              className="ml-auto underline"
-              onClick={async () => showToast((await retryOnline()) ? 'Backend reconnected.' : 'Still offline.')}
-            >
-              Retry connection
-            </button>
-          </div>
-        </div>
-      )}
 
       <main className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</main>
 

@@ -10,20 +10,21 @@ interface Props {
   actions?: ActionSpec[]; // needed for the availability toggles
   onToggle?: (action: ActionSpec, makeUnavailable: boolean) => void;
   compact?: boolean;
+  dense?: boolean; // replay focus panel: tighter rows so the whole table fits above the fold
 }
 
-export function PlanTable({ plan, before, actions, onToggle, compact = false }: Props) {
+export function PlanTable({ plan, before, actions, onToggle, compact = false, dense = false }: Props) {
   const [open, setOpen] = useState<string | null>(null);
   const beforeRank = new Map(before?.ranked.map((r) => [r.action_id, r.rank]) ?? []);
   const newlyExcluded = new Set(
     plan.excluded.filter((e) => !before || !before.excluded.some((b) => b.action_id === e.action_id)).map((e) => e.action_id),
   );
   const spec = (id: string) => actions?.find((a) => a.id === id);
-  const cell = compact ? 'py-2 px-3' : 'py-3 px-4';
+  const cell = dense ? 'py-1.5 px-2' : compact ? 'py-2 px-3' : 'py-3 px-4';
 
   return (
     <div className="overflow-x-auto" data-testid="plan-table">
-      <table className="w-full text-left border-collapse text-sm">
+      <table className={`w-full text-left border-collapse ${dense ? 'text-[13px] leading-snug' : 'text-sm'}`}>
         <thead>
           <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200">
             <th className={`${cell} font-semibold`}>#</th>
@@ -46,7 +47,7 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false }: 
               <Fragment key={r.action_id}>
                 <tr className={`transition ${r.rank === 1 ? 'bg-emerald-50/60' : 'hover:bg-slate-50/80'}`} data-testid={`ranked-${r.action_id}`}>
                   <td className={cell}>
-                    <span className={`inline-flex w-7 h-7 items-center justify-center rounded-full text-xs font-bold ${r.rank === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>{r.rank}</span>
+                    <span className={`inline-flex ${dense ? 'w-6 h-6' : 'w-7 h-7'} items-center justify-center rounded-full text-xs font-bold ${r.rank === 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>{r.rank}</span>
                   </td>
                   <td className={`${cell} font-semibold text-slate-900`}>
                     <button className="flex items-center gap-1.5 text-left" onClick={() => setOpen(isOpen ? null : r.action_id)}>
@@ -55,7 +56,7 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false }: 
                       {r.label}
                     </button>
                     {was != null && was !== r.rank && (
-                      <span className="ml-7 text-xs font-semibold text-amber-700">re-ranked: was #{was}</span>
+                      <span className={`${dense ? 'ml-6 block' : 'ml-7'} text-xs font-semibold text-amber-700`}>re-ranked: was #{was}</span>
                     )}
                   </td>
                   <td className={`${cell} text-right whitespace-nowrap font-semibold num`}>{bits(r.eig_bits)}</td>
@@ -103,18 +104,20 @@ export function PlanTable({ plan, before, actions, onToggle, compact = false }: 
               </Fragment>
             );
           })}
-          {plan.excluded.map((e) => {
+          {[...plan.excluded]
+            .sort((a, b) => Number(newlyExcluded.has(b.action_id) && !!before) - Number(newlyExcluded.has(a.action_id) && !!before))
+            .map((e) => {
             const s = spec(e.action_id);
             return (
               <tr key={e.action_id} className={`bg-red-50/40 ${newlyExcluded.has(e.action_id) && before ? 'animate-slidein' : ''}`} data-testid={`excluded-${e.action_id}`}>
                 <td className={cell}>
-                  <Ban className="w-5 h-5 text-red-500" />
+                  <Ban className={`${dense ? 'w-4 h-4' : 'w-5 h-5'} text-red-500`} />
                 </td>
                 <td className={`${cell}`}>
                   <span className="line-through text-slate-500 font-semibold">{e.label}</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <div className={`flex flex-wrap gap-1 ${dense ? 'mt-0.5' : 'mt-1'}`}>
                     {e.reasons.map((reason, i) => (
-                      <span key={i} className="text-[11px] font-semibold bg-red-100 text-red-800 border border-red-200 rounded px-1.5 py-0.5">
+                      <span key={i} className={`${dense ? 'text-[10px] py-0' : 'text-[11px] py-0.5'} font-semibold bg-red-100 text-red-800 border border-red-200 rounded px-1.5`}>
                         EXCLUDED: {reason}
                       </span>
                     ))}

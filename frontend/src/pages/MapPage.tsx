@@ -5,10 +5,17 @@ import { useApi } from '../lib/hooks';
 import { fmtDate, hypColor, hypIds, hypLabel, kgh, pct, STATUS_META } from '../lib/format';
 import { SiteMap } from '../components/SiteMap';
 import { Caption, Card, CardHeader, ErrorBox, LabelChip, PageTitle, Spinner, Stat, StatusPill, btn } from '../components/ui';
-import type { CaseStatus } from '../types/api';
+import type { CaseStatus, Observation } from '../types/api';
+
+/** e.g. "two plumes combined (3 Apr 2026)" for the combined 2026 observation. */
+function peakSub(o: Observation): string {
+  const combined = /combined|\+/i.test(o.plume_label) || /combined/i.test(o.notes);
+  return `${combined ? 'two plumes combined' : 'single plume'} (${fmtDate(o.date)})`;
+}
 
 export default function MapPage() {
   const { data, error, loading, reload } = useApi(() => api.map());
+  const peak = data?.observations.reduce<Observation | null>((best, o) => (!best || o.rate_kg_h > best.rate_kg_h ? o : best), null) ?? null;
 
   return (
     <div className="space-y-5">
@@ -23,7 +30,7 @@ export default function MapPage() {
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <Stat label="Plume observations" value={data.observations.length} sub="Carbon Mapper (real)" tone="blue" />
-            <Stat label="Peak emission rate" value={kgh(Math.max(0, ...data.observations.map((o) => o.rate_kg_h)))} sub="single observation" tone="red" />
+            <Stat label="Peak emission rate" value={kgh(peak?.rate_kg_h ?? 0)} sub={peak ? peakSub(peak) : '—'} tone="red" />
             <Stat label="Active cases" value={data.cases.length} sub={data.cases.map((c) => c.id).join(', ') || '—'} />
             <Stat
               label="Awaiting human approval"

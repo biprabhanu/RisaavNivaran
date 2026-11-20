@@ -155,44 +155,44 @@ export default function Evaluation() {
           <Card className="overflow-hidden">
             <CardHeader title="Metrics table" subtitle="Every number below comes from the simulation run" />
             <div className="overflow-x-auto">
-              <table className="w-full text-sm" data-testid="metrics-table">
+              <table className="w-full text-[13px] table-fixed" data-testid="metrics-table">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider border-b border-slate-200 text-right">
-                    <th className="py-3 px-4 text-left">Policy</th>
-                    <th className="py-3 px-4">Closed</th>
-                    <th className="py-3 px-4">False closures</th>
-                    <th className="py-3 px-4">Resolved</th>
-                    <th className="py-3 px-4">Correct attribution</th>
-                    <th className="py-3 px-4">Source-ID insp./case</th>
-                    <th className="py-3 px-4">Insp./resolved</th>
-                    <th className="py-3 px-4">Cost/resolved</th>
-                    <th className="py-3 px-4">Days → stakeholder</th>
-                    <th className="py-3 px-4">Traceability</th>
-                    <th className="py-3 px-4">Days → closure</th>
+                  <tr className="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wide border-b border-slate-200 text-right align-bottom leading-tight">
+                    <th className="py-2 px-2 text-left w-[26%]">Policy</th>
+                    <th className="py-2 px-2 whitespace-normal">Closed</th>
+                    <th className="py-2 px-2 whitespace-normal">False closures</th>
+                    <th className="py-2 px-2 whitespace-normal">Resolved</th>
+                    <th className="py-2 px-2 whitespace-normal">Correct attribution</th>
+                    <th className="py-2 px-2 whitespace-normal">Source-ID insp./case</th>
+                    <th className="py-2 px-2 whitespace-normal">Insp./resolved</th>
+                    <th className="py-2 px-2 whitespace-normal">Cost/resolved</th>
+                    <th className="py-2 px-2 whitespace-normal">Days → stakeholder</th>
+                    <th className="py-2 px-2 whitespace-normal">Traceability</th>
+                    <th className="py-2 px-2 whitespace-normal">Days → closure</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-right num">
                   {r.policies.map((p) => (
                     <tr key={p.policy_id} className={p.policy_id === 'C' ? 'bg-emerald-50/60 font-semibold' : ''}>
-                      <td className="py-3 px-4 text-left">
+                      <td className="py-2 px-2 text-left">
                         <div className="flex items-center gap-2">
                           <span className="w-3 h-3 rounded-full" style={{ background: POLICY_COLOR[p.policy_id] }} />
                           <span className="font-bold">{p.policy_id === 'C_noplan' ? 'C-ablation (planner off)' : p.label}</span>
                         </div>
-                        <div className="text-xs text-slate-500 font-normal min-w-[280px] max-w-md">{p.description}</div>
+                        <div className="text-xs text-slate-500 font-normal ">{p.description}</div>
                       </td>
-                      <td className="py-3 px-4">{p.closed_cases}</td>
-                      <td className={`py-3 px-4 font-bold ${p.false_closures === 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+                      <td className="py-2 px-2 whitespace-nowrap">{p.closed_cases}</td>
+                      <td className={`py-2 px-2 whitespace-nowrap font-bold ${p.false_closures === 0 ? 'text-emerald-700' : 'text-red-700'}`}>
                         {p.false_closures} ({num(asPct(p.false_closure_rate), 0)}%)
                       </td>
-                      <td className="py-3 px-4">{p.resolved_cases}</td>
-                      <td className="py-3 px-4">{num(asPct(p.correct_attribution_rate), 0)}%</td>
-                      <td className="py-3 px-4">{num(p.attribution_inspections_per_case, 2)}</td>
-                      <td className="py-3 px-4">{num(p.inspections_per_resolved, 2)}</td>
-                      <td className="py-3 px-4">{inr(p.cost_per_resolved_inr)}</td>
-                      <td className="py-3 px-4">{num(p.mean_days_to_stakeholder, 1)}</td>
-                      <td className="py-3 px-4">{num(asPct(p.traceability_pct), 0)}%</td>
-                      <td className="py-3 px-4">{num(p.mean_days_to_closure, 1)}</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{p.resolved_cases}</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{num(asPct(p.correct_attribution_rate), 0)}%</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{num(p.attribution_inspections_per_case, 2)}</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{num(p.inspections_per_resolved, 2)}</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{inr(p.cost_per_resolved_inr)}</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{num(p.mean_days_to_stakeholder, 1)}</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{num(asPct(p.traceability_pct), 0)}%</td>
+                      <td className="py-2 px-2 whitespace-nowrap">{num(p.mean_days_to_closure, 1)}</td>
                     </tr>
                   ))}
                 </tbody>

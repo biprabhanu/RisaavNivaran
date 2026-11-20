@@ -42,7 +42,7 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false, 
   return (
     <div
       data-testid="approval-card"
-      className={`rounded-2xl border-2 bg-white p-5 shadow-sm ${highlight && pending ? 'border-violet-400 animate-glow' : 'border-slate-200'}`}
+      className={`rounded-2xl border-2 bg-white ${compact ? 'p-4' : 'p-5'} shadow-sm ${highlight && pending ? 'border-violet-400 animate-glow' : 'border-slate-200'}`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -61,8 +61,8 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false, 
         </div>
         <Chip className={STATUS_CLS[item.status]}>{item.status}</Chip>
       </div>
-      <h3 className={`${compact ? 'text-base mt-2' : 'text-lg mt-3'} font-bold text-slate-900`}>{item.title}</h3>
-      <p className="text-sm text-slate-700 mt-1">{item.summary}</p>
+      <h3 title={item.title} className={`${compact ? 'text-base mt-2 truncate' : 'text-lg mt-3'} font-bold text-slate-900`}>{item.title}</h3>
+      <p title={compact ? item.summary : undefined} className={`text-sm text-slate-700 mt-1 ${compact ? 'line-clamp-2' : ''}`}>{item.summary}</p>
 
       {compact && item.proposed_text && !editing && (
         <button className="mt-2 text-xs font-semibold text-violet-700 underline" onClick={() => setShowDraft((v) => !v)}>
@@ -86,8 +86,12 @@ export function ApprovalCard({ item, onDecide, highlight = false, busy = false, 
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-slate-500">
-        {item.evidence_ids.length > 0 && <span className="font-mono">evidence: {item.evidence_ids.join(', ')}</span>}
+      <div className={`flex flex-wrap items-center gap-2 ${compact ? 'mt-2' : 'mt-3'} text-xs text-slate-500`}>
+        {item.evidence_ids.length > 0 && (
+          <span className={`font-mono ${compact ? 'truncate max-w-[260px]' : ''}`} title={item.evidence_ids.join(', ')}>
+            evidence: {item.evidence_ids.join(', ')}
+          </span>
+        )}
         {caseDate && <span>· case date <strong>{fmtDate(caseDate)}</strong></span>}
         <span>· logged {fmtDate(item.created_at)}</span>
         {item.decided_by && (

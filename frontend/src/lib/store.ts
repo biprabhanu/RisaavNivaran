@@ -56,5 +56,5 @@ let toastTimer: ReturnType<typeof setTimeout> | undefined;
 export function showToast(msg: string): void {
   setState({ toast: msg });
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => setState({ toast: null }), 4500);
+  toastTimer = setTimeout(() => setState({ toast: null }), 2500);
 }

@@ -113,3 +113,32 @@ test('rejecting an approval stops the replay until a human approves', async ({ p
 
   expect(consoleErrors, consoleErrors.join('\n')).toEqual([]);
 });
+
+// Projector check: on a 1280×720 screen, the visual each key step is ABOUT is fully on screen without scrolling.
+test.describe('720p projector', () => {
+  test.use({ viewport: { width: 1280, height: 720 } });
+
+  async function fullyInView(page: Page, testId: string) {
+    const loc = page.getByTestId('focus-panel').getByTestId(testId).first();
+    await expect(loc).toBeVisible();
+    await expect
+      .poll(async () => {
+        const b = await loc.boundingBox();
+        return !!b && b.y >= 0 && b.y + b.height <= 720;
+      }, { timeout: 4000, message: `${testId} must be fully inside the 1280×720 viewport` })
+      .toBe(true);
+  }
+
+  test('step 5 OGI exclusion and step 6 Bayes update are above the fold', async ({ page }) => {
+    await startLiveDemo(page);
+    while ((await stepCounter(page)) < 5) await advance(page);
+    expect(await stepCounter(page)).toBe(5);
+    await fullyInView(page, 'excluded-ogi_survey');
+    await expect(page.getByTestId('replanned-badge')).toBeInViewport();
+
+    await advance(page);
+    expect(await stepCounter(page)).toBe(6);
+    await fullyInView(page, 'belief-chart');
+    await expect(page.getByTestId('approve-button')).toBeInViewport({ ratio: 1 });
+  });
+});

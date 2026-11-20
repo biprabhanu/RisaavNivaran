@@ -31,14 +31,19 @@ const STYLES: Record<BannerT['kind'], { cls: string; icon: ReactNode; testid: st
   },
 };
 
-export function Banner({ banner }: { banner: BannerT }) {
+export function Banner({ banner, compact = false }: { banner: BannerT; compact?: boolean }) {
   const s = STYLES[banner.kind] ?? STYLES.info;
   return (
-    <div key={banner.title} data-testid={s.testid} className={`rounded-2xl border-2 px-6 py-5 flex items-center gap-5 shadow-xl ${s.cls}`} role="alert">
-      {s.icon}
-      <div>
-        <p className="text-2xl md:text-3xl font-black tracking-tight uppercase">{banner.title}</p>
-        <p className="text-base md:text-lg mt-1 opacity-95 font-medium">{banner.text}</p>
+    <div
+      key={banner.title}
+      data-testid={s.testid}
+      className={`rounded-2xl border-2 flex items-center shadow-xl ${compact ? 'px-5 py-3 gap-4' : 'px-6 py-5 gap-5'} ${s.cls}`}
+      role="alert"
+    >
+      <span className={compact ? '[&>svg]:w-10 [&>svg]:h-10 shrink-0' : 'shrink-0'}>{s.icon}</span>
+      <div className="min-w-0">
+        <p className={`${compact ? 'text-xl md:text-2xl' : 'text-2xl md:text-3xl'} font-black tracking-tight uppercase leading-tight`}>{banner.title}</p>
+        <p className={`${compact ? 'text-sm md:text-base mt-0.5' : 'text-base md:text-lg mt-1'} opacity-95 font-medium`}>{banner.text}</p>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 // Tiny TypeScript port of the backend engine. Used ONLY in offline snapshot mode
 // (what-if and verification calculator). The backend Python code is the source of truth.
 import type {
-  ActionSpec, Belief, BayesUpdate, Measurement, OutcomePreview, VerificationResult, WhatIfResult,
+  ActionSpec, Belief, BayesUpdate, Case, Measurement, OutcomePreview, PlanResult, TransitionDecision, VerificationResult, WhatIfResult,
 } from '../types/api';
 
 /** H(P) = −Σ p·log2 p (bits). */
@@ -90,4 +90,53 @@ export function verify(pre: Measurement, posts: Measurement[]): VerificationResu
     return { ...base, ...post, verdict: 'STILL_LEAKING', reasons: [`Post estimate ${x.toFixed(0)} ≥ pre lower bound ${base.pre_low.toFixed(0)} kg/h: no demonstrable reduction.`] };
   }
   return { ...base, ...post, verdict: 'INCONCLUSIVE', reasons: ['Pre and post intervals overlap: reduction not demonstrated.'] };
+}
+
+/**
+ * Offline only: re-score a snapshot plan at a different λ. Same rule as backend planner.py:
+ * score = EIG / (cost + λ·time) (0 if the denominator is 0); sort by score, then higher EIG, then lower cost.
+ * Excluded actions stay excluded (constraints don't change with λ).
+ */
+export function rerank(plan: PlanResult, actions: ActionSpec[], lam: number): PlanResult {
+  const byId = new Map(actions.map((a) => [a.id, a]));
+  const ranked = plan.ranked
+    .map((r) => {
+      const a = byId.get(r.action_id);
+      const e = a ? eig(plan.belief, a) : r.eig_bits;
+      const effective = r.cost_inr + lam * r.time_days;
+      const score = effective > 0 ? e / effective : 0;
+      return { ...r, eig_bits: e, effective_cost: effective, score, score_per_10k: score * 10000 };
+    })
+    .sort((x, y) => y.score - x.score || y.eig_bits - x.eig_bits || x.cost_inr - y.cost_inr)
+    .map((r, i) => ({ ...r, rank: i + 1 }));
+  const top = ranked[0];
+  return {
+    ...plan,
+    lam,
+    ranked,
+    recommended_action_id: top && top.eig_bits >= 0.05 ? top.action_id : null,
+    explanation: `${plan.explanation}\n(Offline: scores recomputed locally at λ = ₹${Math.round(lam).toLocaleString('en-IN')}/day.)`,
+  };
+}
+
+/**
+ * Offline only: the closure rule from backend state_machine.py, simplified for the case page.
+ * A case may close only from VERIFICATION_PENDING / INCONCLUSIVE with an independent VERIFIED_REDUCTION verdict,
+ * and even then a human must approve FINAL_CLOSURE first.
+ */
+export function closureDecision(c: Case): TransitionDecision {
+  const verified = c.verification?.verdict === 'VERIFIED_REDUCTION';
+  const fromOk = c.status === 'VERIFICATION_PENDING' || c.status === 'INCONCLUSIVE';
+  if (fromOk && verified) {
+    return {
+      allowed: false, from_status: c.status, to_status: 'VERIFIED_REDUCTION', requires_approval: 'FINAL_CLOSURE',
+      reason: 'Offline: computed locally. Allowed after human approval (FINAL_CLOSURE): independent evidence shows a reduction.',
+    };
+  }
+  return {
+    allowed: false, from_status: c.status, to_status: 'VERIFIED_REDUCTION', requires_approval: null,
+    reason:
+      'Offline: computed locally. Closure REJECTED: no independent post-intervention measurement shows a verified reduction. ' +
+      'A repair-completion claim is not evidence of reduced emissions.',
+  };
 }

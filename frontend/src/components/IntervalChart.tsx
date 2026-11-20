@@ -37,7 +37,7 @@ export function IntervalChart({ result, posts = [], height }: { result: Verifica
   return (
     <div data-testid="interval-chart">
       <ResponsiveContainer width="100%" height={height ?? 70 + rows.length * 52}>
-        <BarChart data={rows} layout="vertical" margin={{ top: 22, right: 110, left: 10, bottom: 8 }}>
+        <BarChart data={rows} layout="vertical" margin={{ top: 22, right: 150, left: 10, bottom: 8 }}>
           <CartesianGrid strokeDasharray="3 3" horizontal={false} />
           <XAxis type="number" domain={[0, Math.ceil(max / 100) * 100]} tick={{ fontSize: 13 }} unit=" kg/h" />
           <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 13, fill: '#0f172a' }} />
@@ -47,7 +47,7 @@ export function IntervalChart({ result, posts = [], height }: { result: Verifica
             {rows.map((r, i) => (
               <Cell key={i} fill={colour(r.kind)} />
             ))}
-            <LabelList dataKey="text" position="right" style={{ fontSize: 12, fill: '#334155', fontWeight: 600 }} />
+            <LabelList dataKey="text" position="right" style={{ fontSize: 12, fill: '#334155', fontWeight: 600, whiteSpace: 'nowrap' }} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>

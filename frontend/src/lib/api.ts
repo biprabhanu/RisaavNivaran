@@ -7,7 +7,7 @@ import type {
   ReplayFrame, ReplayStepInfo, ReplayStepRequest, ToolCall, TransitionDecision, TransitionRequest,
   VerificationRequest, VerificationResult, WhatIfRequest, WhatIfResult,
 } from '../types/api';
-import { verify, whatIf } from './bayes';
+import { closureDecision, rerank, verify, whatIf } from './bayes';
 import { getState, setState } from './store';
 
 const BASE: string = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '';
@@ -170,7 +170,8 @@ export const api = {
       offline: async () => {
         const d = await offlineCase();
         if (!d.plan) throw new OfflineError('No plan in snapshot.');
-        return d.plan;
+        const meta = getState().meta ?? (await loadSnapshot()).meta;
+        return lam != null && meta && lam !== d.plan.lam ? rerank(d.plan, meta.actions, lam) : d.plan;
       },
     }),
   setConstraints: (id: string, c: Constraints) =>
@@ -188,7 +189,18 @@ export const api = {
       },
     }),
   requestTransition: (id: string, body: TransitionRequest) =>
-    request<TransitionDecision>(`/api/cases/${encodeURIComponent(id)}/request-transition`, { method: 'POST', body }),
+    request<TransitionDecision>(`/api/cases/${encodeURIComponent(id)}/request-transition`, {
+      method: 'POST',
+      body,
+      offline: async () => {
+        const c = (await offlineCase()).case;
+        if (body.to_status === 'VERIFIED_REDUCTION') return closureDecision(c);
+        return {
+          allowed: false, from_status: c.status, to_status: body.to_status, requires_approval: null,
+          reason: 'Offline: computed locally. Status changes need the live backend; this snapshot is read-only.',
+        };
+      },
+    }),
   addMeasurement: (id: string, m: Measurement) =>
     request<CaseDetail>(`/api/cases/${encodeURIComponent(id)}/measurements`, { method: 'POST', body: m }),
   draft: (id: string, body: DraftRequest) =>
