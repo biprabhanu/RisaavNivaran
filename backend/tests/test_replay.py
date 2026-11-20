@@ -60,3 +60,23 @@ def test_scratch_replay_does_not_touch_live_state(temp_db):
     frames = replay.frames_in_scratch_db()
     assert len(frames) == replay.TOTAL_STEPS + 1
     assert db.kv_get(replay.KV_KEY)["step"] == 1
+
+
+def test_manual_approval_then_step_advances_past_follow_up_approval():
+    """Regression: approving the framed item by hand must let the replay advance even when the agent
+    immediately queues a follow-up approval (attribution approved → notification pending)."""
+    from plumeproof import db, replay
+    from plumeproof.agent import CaseAgent
+    from plumeproof.schemas import ApprovalDecision
+
+    replay.reset()
+    frame = replay.step()
+    while frame.pending_approval is None or frame.pending_approval.kind.value != "SOURCE_ATTRIBUTION":
+        frame = replay.step()
+    idx = frame.step_index
+    CaseAgent.load(replay.CASE_ID).decide(frame.pending_approval.id, ApprovalDecision(decision="approve"))
+    nxt = replay.step(auto_approve=False)
+    assert nxt.step_index == idx + 1
+    # The newly queued notification is now the frame's pending item, and manual stepping waits for it.
+    assert nxt.pending_approval is not None and nxt.pending_approval.kind.value == "NOTIFICATION"
+    assert replay.step(auto_approve=False).step_index == idx + 1

@@ -322,9 +322,14 @@ def step(auto_approve: bool = True) -> ReplayFrame:
     n_events = len(db.list_events(CASE_ID))
     n_calls = len(db.list_tool_calls(CASE_ID))
     pending = db.list_approvals(CASE_ID, ApprovalStatus.PENDING)
-    if pending:
-        if not auto_approve:
+    if pending and not auto_approve:
+        # Wait only while the approval SHOWN in the current frame is still undecided. If a human already
+        # decided it (via /api/approvals/{id}/decide), the agent may have queued a follow-up approval,
+        # e.g. attribution approved → notification drafted. That one belongs to the next step, so advance.
+        shown = current_frame().pending_approval
+        if shown is not None and any(item.id == shown.id for item in pending):
             return current_frame()
+    elif pending:
         agent = _agent()
         for item in pending:
             agent = _agent()
