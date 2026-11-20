@@ -6,7 +6,7 @@
 
 | What | Where |
 |---|---|
-| Live demo (Render) | **`[FILL IN: https://<service>.onrender.com]`** |
+| Live demo (Render) | **https://plumeproof.onrender.com** |
 | Local fallback | `colima start` → `docker start pp` → open **http://localhost:8000** |
 | Offline fallback | If the backend is unreachable, the site replays a bundled snapshot (amber "Offline snapshot mode" banner) |
 | GitHub | https://github.com/biprabhanu/RisaavNivaran |

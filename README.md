@@ -2,7 +2,7 @@
 
 **Team RisaavNivaran, IIT Bombay · Agentic AI Hackathon 2026 (Ulster University)**
 
-Repository: https://github.com/biprabhanu/RisaavNivaran · Round 2 slides, speech and report: [`round2_submission/`](round2_submission/)
+**Live demo: https://plumeproof.onrender.com** (free tier: first load after idle takes ~1 min) · Repository: https://github.com/biprabhanu/RisaavNivaran · Round 2 slides, speech and report: [`round2_submission/`](round2_submission/)
 
 PlumeProof is a persistent AI case agent that turns a satellite-detected methane plume into a managed investigation:
 
