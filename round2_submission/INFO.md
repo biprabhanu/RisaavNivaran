@@ -1,48 +1,76 @@
-# PlumeProof: Round 2 info sheet
+# PlumeProof: final-round info sheet
 
-**Team RisaavNivaran, IIT Bombay** · Agentic AI Hackathon 2026 · Ulster University · 21–22 November 2026
+**PlumeProof: From Satellite Methane Alerts to Verified Mitigation**
+Agentic AI Hackathon 2026 · Ulster University
+
+| | |
+|---|---|
+| Team Number | **[fill in]** |
+| Team Name | RisaavNivaran |
+| Problem Theme | Agentic AI for Climate, Sustainability & Green Innovation |
+| Institute | Indian Institute of Technology Bombay, India |
+| Team Members | Bipra Bhanu Mohanty (Team Lead), Mandar Deshmukh |
+| Contact | 24b4511@iitb.ac.in · +91 9692886318 |
 
 ## Links
 
 | What | Where |
 |---|---|
-| Live demo (Render) | **https://plumeproof.onrender.com** |
+| **Live demo** | **https://plumeproof.onrender.com** |
+| **GitHub** | **https://github.com/biprabhanu/RisaavNivaran** |
 | Local fallback | `colima start` → `docker start pp` → open **http://localhost:8000** |
-| Offline fallback | If the backend is unreachable, the site replays a bundled snapshot (amber "Offline snapshot mode" banner) |
-| GitHub | https://github.com/biprabhanu/RisaavNivaran |
-| Video | **`[FILL IN: path to plumeproof_60s.mp4]`** (script: `docs/DEMO_SCRIPT.md` §B) |
+| Offline fallback | If the backend can't be reached, the site replays a bundled snapshot (amber "Offline snapshot mode" banner) |
+| Video | **`[fill in: path to plumeproof_60s.mp4]`** (script: `docs/DEMO_SCRIPT.md` §B) |
+
+## Format: 10 minutes = 6 presentation + demo, then 4 Q&A
+
+The demo carries the most marks, so it gets the biggest block. The video plays first, as recommended.
+
+| Slide | Content | Speaker | Time | Clock |
+|---|---|---|---|---|
+| 1 | Front page | Bipra | 0:10 | 0:10 |
+| 2 | 60-second video | Bipra | 0:45 | 0:55 |
+| 3 | Problem + Kanjur test case (real data) | Bipra | 0:30 | 1:25 |
+| 4 | Solution: input → agent → human approval → verified outcome; end users | Mandar | 0:30 | 1:55 |
+| 5 | USPs: EIG planning, evidence-gated closure, auto-reopen | Bipra | 0:40 | 2:35 |
+| 6 | How it works: deterministic core, LLM only drafts | Bipra | 0:15 | 2:50 |
+| 7 | **Live demo** | Mandar | **2:30** | 5:20 |
+| 8 | Results | Bipra | 0:25 | 5:45 |
+| 9 | Impact, limits, next steps, thank you | Bipra | 0:15 | **6:00** |
+| 10 | Backup: assumptions, real vs simulated (Q&A only) | — | — | — |
+
+If the demo runs long, jump from step 8 straight to step 11 (reopened) and go back to slide 8.
 
 ## Pre-demo checklist
 
-- [ ] **2 minutes before:** open the Render URL to wake the free instance. The first load can take about 50 s.
-- [ ] Click **Reset demo** (top right) and wait for the toast "Demo reset…".
-- [ ] Check that the **LLM badge** shows "LLM: on" or "LLM: off (template mode)". Both work.
-- [ ] Set browser zoom so the page fills the projector: 1920×1080 → 100%; 1366×768 → 80%. Use full screen (F11 / ⌃⌘F).
-- [ ] Second tab: **http://localhost:8000**, already running (`colima start`, `docker start pp`), and reset too.
-- [ ] Video file open in a player and paused at 0:00. Volume checked.
-- [ ] Slides open in full-screen PDF mode (`slides/plumeproof_round2.pdf`) on slide 1.
-- [ ] Notifications off, laptop charger plugged in, Wi-Fi or hotspot tested.
+- [ ] **2 minutes before:** open https://plumeproof.onrender.com to wake the free instance. The first load can take about a minute.
+- [ ] Click **Reset demo** (top right) and wait for the "Demo reset" toast.
+- [ ] Set the browser zoom so the page fills the projector: 1920×1080 → 100%, 1366×768 → 80%. Go full screen.
+- [ ] Second tab: **http://localhost:8000**, already running (`colima start`, `docker start pp`) and reset.
+- [ ] Video file open in a player, paused at 0:00, volume checked.
+- [ ] Slides open full screen (`slides/plumeproof_round2.pdf`) on slide 1.
+- [ ] Notifications off, charger plugged in, Wi-Fi or hotspot tested.
 
-## Click-path (live demo, about 2:45)
+## Demo click path (2:30, Replay page)
 
-1. **Landing page** → **Start live demo** (the replay opens on step 0 and does not autoplay).
-2. **Next**: step 1, real plumes of 9 Feb 2025 (1,600 and 136 kg/h).
-3. **Next**: step 2, hypotheses 50 / 35 / 15%, 1.44 bits.
-4. **Next**: step 3, planner. The records request ranks first (0.50 bits for ₹2,000).
-5. **Approve**: step 4, human approves the records request.
-6. **Next**: step 5, OGI inspector unavailable → re-ranked.
-7. **Next**: step 6, records show a fault → gas collection 65%. Then **Approve** (step 7: attribution) and **Approve** (step 8: notice).
-8. **Stop on the red banner, CASE CLOSURE REJECTED** (step 8). Then **Next**: step 9, 610 ± 150 kg/h → VERIFIED (760 < 1,302).
-9. **Approve**: step 10, closed. **Next**: step 11, real plume of 3 Apr 2026 (about 3,300 kg/h) → **CASE REOPENED**. Then open the **Evaluation** tab.
+1. Landing page → **Start live demo** (opens on step 0, no autoplay). Point out the labels: teal = real data, dashed = simulated.
+2. **Next** ×2: real plumes (1,600 and 136 kg/h) → three hypotheses 50 / 35 / 15%, 1.44 bits.
+3. **Next**: planner. Records request ranks first (0.50 bits for ₹2,000).
+4. **Approve**: the human approves; the agent never acts alone.
+5. **Next**: OGI inspector unavailable → excluded before ranking, re-planned.
+6. **Next**: records show a fault → gas collection 65%. **Approve** the attribution.
+7. **Approve** → **CASE CLOSURE REJECTED** (red banner). Pause two seconds: a claim is not evidence.
+8. **Next**: 610 ± 150 kg/h → VERIFIED (760 < 1,302). **Approve** the closure.
+9. **Next**: real plume, 3 Apr 2026 (about 3,300 kg/h) → **CASE REOPENED**. Back to slides.
 
-For Q&A: **Case → Try to close case** (guardrail), **Planner → λ slider / Mark unavailable**, **What-if**.
+For Q&A: **Case → Try to close case** (guardrail), **Planner → λ slider / Mark unavailable**, **What-if**, **Reject** on any approval card.
 
-## Key numbers (all computed by the code or quoted from the proposal PDF)
+## Key numbers (computed by the code or quoted from the proposal PDF)
 
 | Topic | Number |
 |---|---|
-| Problem [1] | 5,000+ MARS alerts in 33 countries · 13% response · UN target 80% by 2030 |
-| Kanjur, real [2] | 9 Feb 2025: about 1,600 and 136 kg/h · 3 Apr 2026: about 3,300 kg/h combined |
+| Problem | 5,000+ UN MARS alerts · 13% response · UN target 80% by 2030 |
+| Kanjur (real) | 9 Feb 2025: about 1,600 and 136 kg/h · 3 Apr 2026: about 3,300 kg/h combined |
 | Prior | waste 50% · gas 35% · flare 15% · H = 1.44 bits |
 | EIG | records 0.50 bits / ₹2,000 · OGI 0.41 / ₹25,000 · ground 0.91 / ₹60,000 · satellite 0.00 / ₹0 |
 | Bits per ₹10k | records 2.50 · OGI 0.17 · ground 0.15 (λ = ₹1,000/day) |
@@ -59,17 +87,13 @@ For Q&A: **Case → Try to close case** (guardrail), **Planner → λ slider / M
 
 | Path | What |
 |---|---|
-| `slides/plumeproof_round2.tex` / `.pdf` | Beamer deck, 16:9: 12 main slides + 8 backup slides (20 pages) |
-| `slides/figures/*.png` | Fresh 1920×1080 app screenshots, `*-crop.png` banner crops and charts |
+| `slides/plumeproof_round2.tex` / `.pdf` | Minimal light-theme Beamer deck, 16:9, 10 pages or fewer (9 main + 1 backup) |
+| `slides/figures/*.png` | 1920×1080 app screenshots, banner crops and charts |
 | `slides/figures/numbers.tex` | Generated LaTeX number macros (do not edit) |
-| `slides/figures/src/compute_numbers.py` | Computes the engine numbers from `backend/plumeproof` → `numbers.json` |
-| `slides/figures/src/evaluation_numbers.json` | Evaluation results from `scenarios.run_evaluation(2026, 25)` (equal to `docs/EVALUATION.md`) |
-| `slides/figures/src/gen_macros.py` | JSON → `numbers.tex` |
-| `slides/figures/src/make_charts.py` | JSON → chart PNGs (matplotlib) |
-| `slides/figures/src/capture.cjs`, `crop_shots.py` | Playwright screenshots at 1920×1080, and banner crops |
-| `slides/figures/src/check_consistency.py` | Checks that every number in the slides, speech and report is allowed |
-| `speech/speech_8min.md` (local only, not in git) | Word-for-word script for two speakers, timing, fallback plan, 12 Q&As |
-| `report/round2_report.md` / `.pdf` | 6-page technical report |
+| `slides/figures/src/` | Scripts that compute the numbers, draw the charts, take the screenshots and check that the numbers match across files |
+| `report/round2_report.md` / `.pdf` | Detailed written report in plain language |
+| `speech/speech_6min.md` | **Local only, not in git.** Word-for-word 6-minute script for Bipra and Mandar, timing, cues, fallback plan, 12 Q&A answers |
+| `INFO.md` | This sheet |
 
 **Rebuild:**
 ```bash
@@ -79,8 +103,7 @@ tectonic plumeproof_round2.tex
 cd ../report && pandoc round2_report.md -o round2_report.pdf --pdf-engine=tectonic
 ```
 
-## Team
+## Still to fill in by hand
 
-- **Bipra Bhanu Mohanty** (Team Lead): agent architecture, evidence planning, evaluation
-- **Mandar Deshmukh**: data pipeline, dashboard, regulatory research
-- **Contact:** 24b4511@iitb.ac.in · +91 9692886318
+1. **Team Number**: on the front slide (`[TEAM NO.]`) and in the table at the top of this sheet.
+2. **Video path**: the `plumeproof_60s.mp4` location in the Links table above.
