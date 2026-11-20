@@ -32,10 +32,10 @@ Backup: if the site is unreachable, the frontend replays from the bundled snapsh
 | Sec | Visual | Voice-over |
 |---|---|---|
 | 0–8 | NASA EMIT plume image → Landing page stat "13%" | "Satellites now spot methane leaks from space. But only 13% of UN alerts ever get a response." |
-| 8–18 | Replay step 1–2: map, plumes, belief bars | "PlumeProof turns each alert into a case. Real Kanjur landfill data, three competing source hypotheses." |
-| 18–30 | Step 3–4: planner table, OGI struck out | "It picks the investigation that buys the most information per rupee and per day, and re-plans when a resource drops out. Humans approve every critical step." |
-| 30–42 | Step 6: red REJECTED banner | "When the operator claims the leak is fixed, PlumeProof refuses to close the case without an independent measurement." |
-| 42–52 | Step 7–8: interval chart, REOPENED banner | "It verifies the reduction with uncertainty, and reopens the case automatically when emissions return." |
+| 8–18 | Replay steps 1–2: map, plumes, belief bars | "PlumeProof turns each alert into a case. Real Kanjur landfill data, three competing source hypotheses." |
+| 18–30 | Steps 3–5: planner table, Approve, OGI struck out + RE-RANKED | "It picks the investigation that buys the most information per rupee and per day, and re-plans when a resource drops out. Humans approve every critical step." |
+| 30–42 | Step 6 (Bayes bars) → step 8: red REJECTED banner | "When the operator claims the leak is fixed, PlumeProof refuses to close the case without an independent measurement." |
+| 42–52 | Steps 9–11: interval chart, VERIFIED, then REOPENED banner | "It verifies the reduction with uncertainty, and reopens the case automatically when emissions return." |
 | 52–60 | Evaluation chart: false closures A/B vs C = 0 | "Zero false closures across 25 scenarios. PlumeProof: from satellite alert to verified mitigation." |
 
 ## C. 10 likely judge questions
@@ -50,3 +50,5 @@ Backup: if the site is unreachable, the frontend replays from the bundled snapsh
 8. **How do you handle an operator who never replies?** `track_deadline` flags overdue tasks. The agent escalates, treats the action as failed (no belief update), and re-ranks the remaining options.
 9. **What's real and what's simulated?** The Carbon Mapper plume observations (9 Feb 2025, 3 Apr 2026) are real. Stakeholder responses, inspector availability, records content, repair claims and the follow-up measurement are simulated and labelled as such on every screen.
 10. **What's the role of λ?** λ converts days into rupees, the cost of delay. A high λ favours fast actions; λ = 0 ranks on money alone. The slider shows the ranking is robust across a wide range.
+11. **Why does reopening reset the beliefs to 50/35/15?** The 2025 repair was *verified*, so its gas-system finding explained the 2025 plume. A plume 14 months later could be a failed repair or a new source, and treating the old posterior as current would be over-confident. The agent restarts from the geospatial prior, keeps the full history in the audit log, and its new outstanding questions ask exactly this.
+12. **Isn't "0 false closures" true by construction?** Partly, and that's the point. Closure is gated by a rule that a claim can't satisfy. The evaluation shows what the gate costs (an extra measurement campaign per case) and that the planner still needs fewer source-identification inspections than the checklist (0.72 vs 1.80 per case). The bounded-noise measurement model is a stated assumption.

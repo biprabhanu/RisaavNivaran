@@ -110,3 +110,9 @@ OUTSTANDING_QUESTIONS: list[str] = [
     "When was the flare system last non-operational?",
     "Are gas-collection well maintenance records available for Jan–Feb 2025?",
 ]
+
+# Which investigation answers which outstanding question (used to keep the case page current).
+QUESTION_ANSWERED_BY: dict[str, str] = {
+    "When was the flare system last non-operational?": "records_request",
+    "Are gas-collection well maintenance records available for Jan–Feb 2025?": "records_request",
+}

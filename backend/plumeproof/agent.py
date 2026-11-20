@@ -277,6 +277,17 @@ class CaseAgent:
         if self.case.status == S.OPEN:
             self.request_transition(S.SOURCE_ATTRIBUTION_PENDING, reason="hypotheses initialised")
 
+    def _mark_questions_answered(self, action_id: str, outcome_label: str) -> None:
+        """Questions that this action answers get an 'Answered' prefix, so the case page stays current."""
+        from .kanjur import QUESTION_ANSWERED_BY
+
+        updated = []
+        for q in self.case.outstanding_questions:
+            if not q.startswith("Answered") and QUESTION_ANSWERED_BY.get(q) == action_id:
+                q = f"Answered by {ACTIONS_BY_ID[action_id].label.lower()} ({outcome_label.lower()}): {q}"
+            updated.append(q)
+        self.case.outstanding_questions = updated
+
     def update_beliefs(self, action_id: str, outcome_id: str, sim_date: Optional[str] = None,
                        actor: ActorType = ActorType.SIMULATED, actor_name: str = "Landfill operator (simulated)",
                        label: DataLabel = DataLabel.SIMULATED_EVENT) -> BayesUpdate:
@@ -288,6 +299,7 @@ class CaseAgent:
         action = ACTIONS_BY_ID[action_id]
         outcome = next(o for o in action.outcomes if o.id == outcome_id)
         upd = bayes.update_with_outcome(self.case.belief, action, outcome_id)
+        self._mark_questions_answered(action_id, outcome.label)
         approval_id = None
         for a in reversed(db.list_approvals(self.case.id)):
             if a.payload.get("action_id") == action_id:
@@ -587,7 +599,7 @@ class CaseAgent:
         if self.case.status == S.REPAIR_REPORTED:
             self.request_transition(S.VERIFICATION_PENDING, reason="independent post-intervention measurement required",
                                     evidence_ids=[claim.id])
-        tools.track_deadline(self.case, "Independent post-intervention measurement", add_days(self.case.sim_date, 60),
+        tools.track_deadline(self.case, "Independent post-intervention measurement", add_days(self.case.sim_date, 90),
                              related_action="independent_measurement")
         self.save()
         return closure
@@ -603,6 +615,8 @@ class CaseAgent:
             label=m.label, actor=m.actor, actor_name=m.method, chain_stage=ChainStage.VERIFICATION,
             evidence_ids=[m.id], data=m.model_dump(),
         )
+        if m.independent:
+            tools.track_deadline(self.case, "", "", mark_met="independent_measurement")
         pre = self.case.pre_measurement
         if pre is None:
             self.save()
@@ -701,6 +715,11 @@ class CaseAgent:
                 self.case.repaired_source = None
                 self.case.verification = None
                 self.case.measurements = []
+                self.case.outstanding_questions = [
+                    "Did the March 2025 gas-collection repair fail, or is there a new source?",
+                    "Which plume locations in the 3 Apr 2026 observation match the repaired components?",
+                    "Is the flare system operating continuously in 2026?",
+                ]
                 self.case.pre_measurement = Measurement(
                     id=f"PRE-{obs.id}", rate_kg_h=obs.rate_kg_h, uncertainty_kg_h=round(obs.rate_kg_h * 0.25, 1),
                     date=obs.date, method=f"{obs.source} satellite", independent=True, actor=ActorType.SATELLITE,

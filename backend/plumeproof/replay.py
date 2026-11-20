@@ -176,7 +176,7 @@ def _s8_repair_claim() -> StepResult:
     return StepResult(
         narration=("SIMULATED: on 20 Mar 2025 the operator reports the gas-collection repair complete and asks to close "
                    "the case. The agent REFUSES: there is no independent post-intervention measurement, and a claim is "
-                   "not evidence. The case stays VERIFICATION PENDING."),
+                   "not evidence. The case moves to VERIFICATION PENDING until independent evidence arrives."),
         banner=Banner(kind="rejected", title="CASE CLOSURE REJECTED",
                       text="No independent post-intervention measurement. A repair claim is not evidence."),
     )
