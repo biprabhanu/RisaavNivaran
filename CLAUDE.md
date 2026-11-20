@@ -55,6 +55,12 @@ Deterministic core, LLM at the edges: all maths and state changes live in plain 
 9. Audit log: each event has a timestamp, actor, type, evidence links and a label (REAL DATA / AGENT ACTION / SIMULATED EVENT / HUMAN DECISION), plus an evidence-chain stage.
 10. Honest labelling: only the Carbon Mapper plumes are real. Everything else is visibly simulated.
 
-## Current status
-- [x] Phase A started: venv removed from git, docs created, API contract defined
-- [ ] Engine, API, UI and evaluation (in progress through subagents)
+## Current status (2026-11-21)
+- Phases A–F are implemented (see docs/ROADMAP.md).
+- Backend: 102 pytest tests pass. The worked example reproduces: records 0.499 bits, OGI 0.413, ground 0.914, satellite 0; P(fault) 0.433; posterior 65/29/6; no-fault waste 83.7%.
+- Evaluation (seed 2026, 25 scenarios): false closures A 25, B 25, C 0, ablation 0; source-ID inspections per case B 1.80 vs C 0.72; ±20% sensitivity keeps the top action in 100% of draws.
+- Frontend: `npm run build` and typecheck pass; the Playwright e2e replay passes; the offline snapshot fallback works.
+- Docker: the image builds; `docker run -p 8000:8000 plumeproof` serves the UI, `/api` and `/docs`; the DB seeds on startup.
+- Replay: 11 steps (frame 0 = intro). Step 5 is OGI unavailable, step 8 is the repair claim rejected, step 11 is the 2026 reopen.
+- Known limits: see the README "Honest limitations" section. The LLM path is untested against the live API (no key in the dev environment).
+- Regenerate `frontend/src/lib/snapshot.json` (`python -m plumeproof.export_snapshot`) after any change to the replay or evaluation.
