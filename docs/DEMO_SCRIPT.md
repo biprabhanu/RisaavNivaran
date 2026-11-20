@@ -4,7 +4,7 @@
 
 ## A. 3-minute live demo (click by click)
 
-The replay has 11 steps. When an approval card is showing, click **Approve**: that click is the human decision, and the replay advances. In Play mode, approvals are taken as the presenter's click automatically.
+The replay has 11 steps and never advances on its own unless you press Play. When an approval card is showing, click **Approve**: that click is the human decision, and the replay advances. In Play mode, approvals are taken as the presenter's click automatically.
 
 
 | Time | Click | Say |
