@@ -2,6 +2,8 @@
 
 **Team RisaavNivaran, IIT Bombay · Agentic AI Hackathon 2026 (Ulster University)**
 
+Repository: https://github.com/biprabhanu/RisaavNivaran · Round 2 slides, speech and report: [`round2_submission/`](round2_submission/)
+
 PlumeProof is a persistent AI case agent that turns a satellite-detected methane plume into a managed investigation:
 
 - It keeps competing source hypotheses and updates them with Bayes' rule.
@@ -67,6 +69,7 @@ With every likelihood perturbed by ±20% (200 draws), the top-ranked action is u
 ## Quickstart
 **Docker (recommended; one command, everything included)**
 ```bash
+git clone https://github.com/biprabhanu/RisaavNivaran.git && cd RisaavNivaran
 docker build -t plumeproof .
 docker run -p 8000:8000 plumeproof
 # open http://localhost:8000  (API docs: http://localhost:8000/docs)

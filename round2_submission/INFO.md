@@ -9,7 +9,7 @@
 | Live demo (Render) | **`[FILL IN: https://<service>.onrender.com]`** |
 | Local fallback | `colima start` → `docker start pp` → open **http://localhost:8000** |
 | Offline fallback | If the backend is unreachable, the site replays a bundled snapshot (amber "Offline snapshot mode" banner) |
-| GitHub | https://github.com/MandarDeshmukh23/RisaavNivaran |
+| GitHub | https://github.com/biprabhanu/RisaavNivaran |
 | Video | **`[FILL IN: path to plumeproof_60s.mp4]`** (script: `docs/DEMO_SCRIPT.md` §B) |
 
 ## Pre-demo checklist
