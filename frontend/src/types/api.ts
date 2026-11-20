@@ -155,13 +155,14 @@ export type PolicyId = 'A' | 'B' | 'C' | 'C_noplan';
 export interface PolicyMetrics {
   policy_id: PolicyId; label: string; description: string; n_cases: number; closed_cases: number;
   false_closures: number; false_closure_rate: number; resolved_cases: number; correct_attribution_rate: number;
-  inspections_total: number; inspections_per_resolved: number | null; cost_total_inr: number;
+  inspections_total: number; inspections_per_resolved: number | null;
+  attribution_inspections_per_case: number; verification_inspections_total: number; cost_total_inr: number;
   cost_per_resolved_inr: number | null; mean_days_to_stakeholder: number | null; stakeholder_assigned_rate: number;
   traceability_pct: number; mean_days_to_closure: number | null;
 }
 export interface ScenarioPolicyOutcome {
   final_status: string; closed: boolean; false_closure: boolean; resolved: boolean; attributed_source: string | null;
-  inspections: number; cost_inr: number; days_to_stakeholder: number | null; days_elapsed: number;
+  inspections: number; attribution_inspections: number; cost_inr: number; days_to_stakeholder: number | null; days_elapsed: number;
   actions: string[]; critical_decisions: number; traceable_decisions: number;
 }
 export interface ScenarioResult { scenario_id: string; tags: string[]; true_source: string; description: string; outcomes: Record<string, ScenarioPolicyOutcome> }

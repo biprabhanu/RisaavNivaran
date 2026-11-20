@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html { font-size: 16px; }
+body { @apply bg-slate-50 text-slate-900 antialiased; }
+.leaflet-container { font: inherit; }
+.num { font-variant-numeric: tabular-nums; }
