@@ -82,7 +82,15 @@ Physical reasoning: operational records reveal faults in *engineered* systems (g
 - In the replay, LLM drafting is not used, so steps stay instant and deterministic. Claude (if a key is set) is used for the on-demand buttons: Explain ranking, Draft notice and Case summary.
 
 ## 7. Evaluation
-See docs/EVALUATION.md for the scenario generator parameters, the policy definitions and the metric definitions (the evaluation agent appends them here as well).
+Implemented in `backend/plumeproof/scenarios.py`. Everything is simulated; full write-up in docs/EVALUATION.md.
+- **Scenarios**: 25, seed 2026. 4 are plain; each tag (ambiguous, missing_records, inspector_unavailable, conflicting_measurements, unsupported_claim, recurrence) is assigned to 5 random scenarios. True source ~ default prior (ambiguous: agent prior 0.36/0.34/0.30, true source uniform). E0 ~ U[600, 3500] kg/h.
+- **World**: one outcome per action, pre-sampled from P(y | true source, a), plus pre-sampled measurement noise. Every policy faces the same world.
+- **Delays**: human approval 1 day; A's alert is forwarded by the national focal point after 30 days; B's manual stakeholder lookup takes 7 days; C's overlay + approval takes 1 day; operator repair 14 days; a missing-records request times out after a 7-day deadline; B waits 14 days for an unavailable resource, then skips it.
+- **Repair**: the operator repairs the source it is told about (A: argmax of the prior). It is effective (E → 0.25·E0) only if that is the true source. In unsupported_claim scenarios the operator's **first** claim is false (nothing effective done); later claims, after the agent escalates, are genuine.
+- **Measurements**: pre = E0 ± 25% (satellite). Independent post = truth + noise with |noise| ≤ 0.8·u, u = 0.15·truth + 50 kg/h (**bounded-noise assumption**). Conflicting campaign: a second instrument reads ≥ 60% high, pushed until the intervals are disjoint. Each new campaign is evaluated on its own measurements; the conflicting pair is kept in the record.
+- **"Truth reduced"** means true post < 0.5·E0. Recurrence: emission returns to E0 300 days after closure.
+- **Limits**: at most 3 repair loops and 3 measurement campaigns per loop.
+- **Ablation** keeps C's stopping rule (stop when no allowed action has EIG ≥ 0.05 bits) and changes only the choice of action, to cheapest first.
 
 ## 8. Infrastructure
 - SQLite instead of PostgreSQL/PostGIS. The schema is simple JSON-in-SQLite. PostGIS and GeoPandas are future work.
