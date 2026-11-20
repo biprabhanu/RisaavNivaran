@@ -1,22 +1,25 @@
 // Routes + app bootstrap (health check, metadata). HashRouter means the server only ever
 // needs to serve index.html; every page lives behind "#/...".
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import PageLoader from './components/PageLoader';
 import { api } from './lib/api';
 import { registerMeta } from './lib/format';
 import { setState, useAppState } from './lib/store';
+// Landing is loaded eagerly (it is the first screen). Every other page is code-split, so
+// Leaflet and Recharts only download when a page that needs them is opened.
 import Landing from './pages/Landing';
-import Replay from './pages/Replay';
-import MapPage from './pages/MapPage';
-import CaseDetailPage from './pages/CaseDetail';
-import Planner from './pages/Planner';
-import Approvals from './pages/Approvals';
-import Verification from './pages/Verification';
-import Audit from './pages/Audit';
-import Evaluation from './pages/Evaluation';
-import WhatIf from './pages/WhatIf';
-import DataSources from './pages/DataSources';
+const Replay = lazy(() => import('./pages/Replay'));
+const MapPage = lazy(() => import('./pages/MapPage'));
+const CaseDetailPage = lazy(() => import('./pages/CaseDetail'));
+const Planner = lazy(() => import('./pages/Planner'));
+const Approvals = lazy(() => import('./pages/Approvals'));
+const Verification = lazy(() => import('./pages/Verification'));
+const Audit = lazy(() => import('./pages/Audit'));
+const Evaluation = lazy(() => import('./pages/Evaluation'));
+const WhatIf = lazy(() => import('./pages/WhatIf'));
+const DataSources = lazy(() => import('./pages/DataSources'));
 
 function useBootstrap() {
   const { offline } = useAppState();
@@ -37,6 +40,7 @@ export default function App() {
   return (
     <HashRouter>
       <Layout>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/replay" element={<Replay />} />
@@ -52,6 +56,7 @@ export default function App() {
           <Route path="/data" element={<DataSources />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </Suspense>
       </Layout>
     </HashRouter>
   );
