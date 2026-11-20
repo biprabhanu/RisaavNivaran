@@ -237,6 +237,7 @@ def draft(case_id: str, req: DraftRequest) -> DraftResult:
                 f"#{r.rank} {r.label}: EIG {r.eig_bits:.2f} bits, ₹{r.cost_inr:,.0f}, {r.time_days:g} days, "
                 f"score {r.score_per_10k:.3f} per ₹10k-equivalent" for r in plan.ranked),
             "excluded_actions": "; ".join(f"{e.label} ({', '.join(e.reasons)})" for e in plan.excluded) or "none",
+            "plan": plan,  # raw PlanResult: the template computes the per-action arithmetic from it
         }
         return llm.draft("ranking_explanation", ctx)
     c = agent.case
