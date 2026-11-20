@@ -1,0 +1,12 @@
+[
+  {
+    "observation_id": "OBS-JSON-501",
+    "facility_name": "Kanjur Landfill North",
+    "latitude": 19.1350,
+    "longitude": 72.9300,
+    "observation_date": "2026-05-18",
+    "emission_rate_kg_hour": 1250.0,
+    "source": "HISTORICAL SATELLITE DATA",
+    "confidence": 0.94
+  }
+]

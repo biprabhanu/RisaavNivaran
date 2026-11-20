@@ -1,0 +1,220 @@
+{
+  "project": "PlumeProof",
+  "team": "Team RisaavNivaran, IIT Bombay",
+  "version": "1.0.0",
+  "description": "Agentic AI application converting satellite methane emissions into investigations and verified mitigation outcomes.",
+  "cases": [
+    {
+      "case_id": "KJ-2025-02",
+      "facility": "Kanjur Landfill",
+      "location": "Mumbai, India",
+      "latitude": 19.1312,
+      "longitude": 72.9345,
+      "observation_date": "2025-02-09",
+      "emission_rate_kg_hour": 1736,
+      "priority": "High",
+      "investigation_status": "Source Attribution Pending",
+      "source_attribution": [
+        {
+          "source": "Exposed waste surface",
+          "probability": 0.5
+        },
+        {
+          "source": "Gas collection system",
+          "probability": 0.35
+        },
+        {
+          "source": "Flare system",
+          "probability": 0.15
+        }
+      ],
+      "satellite_observations": [
+        {
+          "plume_id": "Plume A",
+          "emission_rate": 1600,
+          "unit": "kg CH4/hour",
+          "date": "2025-02-09",
+          "label": "HISTORICAL SATELLITE DATA"
+        },
+        {
+          "plume_id": "Plume B",
+          "emission_rate": 136,
+          "unit": "kg CH4/hour",
+          "date": "2025-02-09",
+          "label": "HISTORICAL SATELLITE DATA"
+        }
+      ],
+      "outstanding_requirements": [
+        "Which organisation operates the gas-processing infrastructure?",
+        "When was the flare system last non-operational?"
+      ]
+    },
+    {
+      "case_id": "KJ-2026-03",
+      "facility": "Kanjur Landfill",
+      "location": "Mumbai, India",
+      "latitude": 19.133,
+      "longitude": 72.936,
+      "observation_date": "2026-04-03",
+      "emission_rate_kg_hour": 3300,
+      "priority": "Critical",
+      "investigation_status": "Investigation Requested",
+      "source_attribution": [
+        {
+          "source": "Gas collection system",
+          "probability": 0.6
+        },
+        {
+          "source": "Exposed waste surface",
+          "probability": 0.3
+        },
+        {
+          "source": "Flare system",
+          "probability": 0.1
+        }
+      ],
+      "satellite_observations": [
+        {
+          "plume_id": "Plume C & D",
+          "emission_rate": 3300,
+          "unit": "kg CH4/hour",
+          "date": "2026-04-03",
+          "label": "HISTORICAL SATELLITE DATA"
+        }
+      ],
+      "outstanding_requirements": [
+        "Verify flare combustion efficiency during April 2026 satellite pass."
+      ]
+    }
+  ],
+  "investigations": [
+    {
+      "id": "inv_1",
+      "name": "Request operational records",
+      "information_gain": 0.5,
+      "cost": 2000,
+      "time_days": 1,
+      "available": true,
+      "reason": "Relatively low-cost preliminary investigation that helps distinguish between gas-collection infrastructure and exposed waste surface."
+    },
+    {
+      "id": "inv_2",
+      "name": "Gas-imaging survey",
+      "information_gain": 0.41,
+      "cost": 25000,
+      "time_days": 2,
+      "available": true,
+      "reason": "Optical gas imaging (OGI) pinpoints active methane leaks across collection pipelines."
+    },
+    {
+      "id": "inv_3",
+      "name": "Comprehensive ground-level survey",
+      "information_gain": 0.91,
+      "cost": 60000,
+      "time_days": 5,
+      "available": true,
+      "reason": "Highest absolute information gain across the site, though requiring higher cost and time."
+    },
+    {
+      "id": "inv_4",
+      "name": "Await next satellite observation",
+      "information_gain": 0.01,
+      "cost": 0,
+      "time_days": 30,
+      "available": true,
+      "reason": "Passive monitoring via orbital passes without active ground deployment."
+    }
+  ],
+  "timeline": [
+    {
+      "event_id": "EVT-001",
+      "event_type": "Satellite observation recorded",
+      "timestamp": "2025-02-09 11:30:00",
+      "description": "Carbon Mapper detected two methane plumes at Kanjur Landfill (1,600 kg/hr and 136 kg/hr).",
+      "evidence": "HISTORICAL SATELLITE DATA",
+      "responsible_actor": "Carbon Mapper Satellite",
+      "approval_status": "Auto-Approved"
+    },
+    {
+      "event_id": "EVT-002",
+      "event_type": "Potential sources identified",
+      "timestamp": "2025-02-09 11:35:00",
+      "description": "Agent established competing hypotheses: Exposed waste surface (50%), Gas collection system (35%), Flare system (15%).",
+      "evidence": "AGENT-GENERATED OUTPUT",
+      "responsible_actor": "Source Hypothesis Manager",
+      "approval_status": "Pending Review"
+    },
+    {
+      "event_id": "EVT-003",
+      "event_type": "Investigation plan generated",
+      "timestamp": "2025-02-09 12:00:00",
+      "description": "Evidence Planner ranked 'Request operational records' as top recommendation (0.50 bits, \u20b92,000, 1 day).",
+      "evidence": "AGENT-GENERATED OUTPUT",
+      "responsible_actor": "Evidence Planner Agent",
+      "approval_status": "Approved by Human"
+    },
+    {
+      "event_id": "EVT-004",
+      "event_type": "Investigation resource unavailable",
+      "timestamp": "2025-02-11 09:15:00",
+      "description": "Field imaging crew reported temporary unavailability due to heavy equipment maintenance.",
+      "evidence": "SIMULATED DEMONSTRATION DATA",
+      "responsible_actor": "Operations Coordinator",
+      "approval_status": "Logged"
+    },
+    {
+      "event_id": "EVT-005",
+      "event_type": "Revised investigation plan generated",
+      "timestamp": "2025-02-11 10:00:00",
+      "description": "Agent excluded unavailable gas-imaging survey and re-ranked remaining options. New top recommendation: Request operational records.",
+      "evidence": "AGENT-GENERATED OUTPUT",
+      "responsible_actor": "Evidence Planner Agent",
+      "approval_status": "Approved by Human"
+    },
+    {
+      "event_id": "EVT-006",
+      "event_type": "Operator reports repair completion",
+      "timestamp": "2025-02-20 14:30:00",
+      "description": "Municipal contractor submitted notice stating gas collection pipe seal and flare igniter repaired.",
+      "evidence": "SIMULATED DEMONSTRATION DATA",
+      "responsible_actor": "Facility Operator",
+      "approval_status": "Submitted"
+    },
+    {
+      "event_id": "EVT-007",
+      "event_type": "Case closure rejected",
+      "timestamp": "2025-02-20 14:35:00",
+      "description": "Agent rejected automated closure request because no independent post-intervention measurement was provided.",
+      "evidence": "AGENT-GENERATED OUTPUT",
+      "responsible_actor": "Verification Agent",
+      "approval_status": "Enforced by Rule"
+    },
+    {
+      "event_id": "EVT-008",
+      "event_type": "Follow-up measurement submitted",
+      "timestamp": "2025-02-25 11:00:00",
+      "description": "Independent drone-based spectrometer survey submitted: Post-intervention rate 120 \u00b1 30 kg CH4/hr (Pre: 1,736 \u00b1 150 kg CH4/hr).",
+      "evidence": "SIMULATED DEMONSTRATION DATA",
+      "responsible_actor": "Independent Survey Team",
+      "approval_status": "Submitted"
+    },
+    {
+      "event_id": "EVT-009",
+      "event_type": "Verification assessment generated",
+      "timestamp": "2025-02-25 11:10:00",
+      "description": "Verification engine confirmed rule: Upper bound of post-interval (150) < Lower bound of pre-interval (1,586). Outcome: VERIFIED EMISSION REDUCTION.",
+      "evidence": "AGENT-GENERATED OUTPUT",
+      "responsible_actor": "Verification Engine",
+      "approval_status": "Approved & Case Resolved"
+    },
+    {
+      "event_id": "EVT-1795173287",
+      "event_type": "Verification assessment generated",
+      "timestamp": "2026-11-20 16:44:47",
+      "description": "Verification evaluation result: VERIFIED EMISSION REDUCTION. Upper bound of post-intervention interval (150.0) < lower bound of pre-intervention interval (1586.0). Independent evidence and comparable conditions confirmed.",
+      "evidence": "AGENT-GENERATED OUTPUT",
+      "responsible_actor": "Verification Engine",
+      "approval_status": "Approved & Case Processed"
+    }
+  ]
+}
