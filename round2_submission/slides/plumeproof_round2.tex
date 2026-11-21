@@ -9,12 +9,12 @@
 \setsansfont{FiraSans}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-SemiBold, ItalicFont=*-Italic, BoldItalicFont=*-SemiBoldItalic]
 \setmonofont{FiraMono}[Extension=.otf, UprightFont=*-Regular, BoldFont=*-Bold]
 \usepackage{graphicx,booktabs,tikz,amsmath,xcolor,array,tabularx}
-\usepackage{multimedia}   % \movie: clicking the poster plays video/plumeproof_60s.mp4 (keep the video folder next to the PDF)
 \usepackage{unicode-math}
 \setmathfont{FiraMath-Regular.otf}
 \usefonttheme{professionalfonts}
 \usetikzlibrary{arrows.meta,positioning,calc}
 \newcommand{\rupee}{₹}
+\newcommand{\VIDEOURL}{file:///Users/biprabhanumohanty/Projects/RisavNivaran/RisaavNivaran/round2_submission/slides/video/plumeproof_60s.mp4}
 \input{figures/numbers.tex}
 \graphicspath{{figures/}}
 \hypersetup{colorlinks=false,pdfborder={0 0 0},pdftitle={PlumeProof: From Satellite Methane Alerts to Verified Mitigation},pdfauthor={Team RisaavNivaran, IIT Bombay}}
@@ -110,17 +110,18 @@ Contact & 24b4511@iitb.ac.in\\ \hline
 % ======================= 1. VIDEO =======================
 \begin{frame}[t]{Product Video}
 \centering
-% The poster is the video's first frame with a play button; clicking it opens the 60-second MP4
-% (recorded from the live app by figures/src/record_video.cjs) in the system video player.
-\movie[externalviewer,width=10.6cm,height=5.96cm]{%
+% Clicking the poster opens the 60-second MP4 (recorded from the live app by figures/src/record_video.cjs)
+% in the default video player. A plain file:// link is used because macOS Preview ignores "launch" actions.
+% If the deck moves to another computer, update VIDEOURL below (or just double-click video/plumeproof_60s.mp4).
+\href{\VIDEOURL}{%
 \begin{tikzpicture}
 \node[inner sep=0pt](p){\includegraphics[width=10.6cm,height=5.96cm]{video_poster.png}};
 \fill[white,opacity=0.25] (p.south west) rectangle (p.north east);
 \draw[slateL,line width=0.8pt,rounded corners=3pt] (p.south west) rectangle (p.north east);
 \node[circle,fill=teal,draw=white,line width=2pt,minimum size=1.7cm] at (p.center){};
 \fill[white] ($(p.center)+(-0.22,0.38)$)--($(p.center)+(-0.22,-0.38)$)--($(p.center)+(0.41,0)$)--cycle;
-\end{tikzpicture}}{video/plumeproof_60s.mp4}\\[0.04cm]
-{\footnotesize\color{slate}60-second product overview, recorded from the live application}
+\end{tikzpicture}}\\[0.0cm]
+{\footnotesize\color{slate}60-second product overview, recorded from the live application (click to play)}
 \end{frame}
 
 % ======================= 2. PROBLEM =======================
