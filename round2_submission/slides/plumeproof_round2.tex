@@ -112,7 +112,8 @@ Contact & 24b4511@iitb.ac.in\\ \hline
 \centering
 % Clicking the poster opens the 60-second MP4 (recorded from the live app by figures/src/record_video.cjs)
 % in the default video player. A plain file:// link is used because macOS Preview ignores "launch" actions.
-% If the deck moves to another computer, update VIDEOURL below (or just double-click video/plumeproof_60s.mp4).
+% The link MUST start with file:// (a bare path becomes a "launch" action, which Preview ignores).
+% VIDEOURL is set at the top of this file; on another computer change it there (or double-click video/plumeproof_60s.mp4).
 \href{\VIDEOURL}{%
 \begin{tikzpicture}
 \node[inner sep=0pt](p){\includegraphics[width=10.6cm,height=5.96cm]{video_poster.png}};
