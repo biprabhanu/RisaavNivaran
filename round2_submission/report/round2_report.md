@@ -24,7 +24,7 @@ Every number comes from ../slides/figures/src/numbers.json, evaluation_numbers.j
 
 ::: web-only
 **PlumeProof: From Satellite Methane Alerts to Verified Mitigation**  
-Team RisaavNivaran (Team Number: [TEAM NO.]) · Indian Institute of Technology Bombay · Bipra Bhanu Mohanty, Mandar Deshmukh  
+Team RisaavNivaran (Team Number: T028) · Indian Institute of Technology Bombay · Bipra Bhanu Mohanty, Mandar Deshmukh  
 Theme: Agentic AI for Climate, Sustainability & Green Innovation  
 Live demo: <https://plumeproof.onrender.com> · Code: <https://github.com/biprabhanu/RisaavNivaran>
 :::

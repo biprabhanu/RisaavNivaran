@@ -5,7 +5,7 @@ Agentic AI Hackathon 2026 · Ulster University
 
 | | |
 |---|---|
-| Team Number | **[fill in]** |
+| Team Number | **T028** |
 | Team Name | RisaavNivaran |
 | Problem Theme | Agentic AI for Climate, Sustainability & Green Innovation |
 | Institute | Indian Institute of Technology Bombay, India |
@@ -20,7 +20,7 @@ Agentic AI Hackathon 2026 · Ulster University
 | **GitHub** | **https://github.com/biprabhanu/RisaavNivaran** |
 | Local fallback | `colima start` → `docker start pp` → open **http://localhost:8000** |
 | Offline fallback | If the backend can't be reached, the site replays a bundled snapshot (amber "Offline snapshot mode" banner) |
-| Video | **`[fill in: path to plumeproof_60s.mp4]`** (script: `docs/DEMO_SCRIPT.md` §B) |
+| Video | `slides/video/plumeproof_60s.mp4` (60 s, 1080p). Slide 2's play button opens it in **Adobe Acrobat Reader**; in macOS Preview, double-click the file instead. Keep `video/` next to the PDF. Re-record: `slides/figures/src/make_video.sh` |
 
 ## Format: 10 minutes = 6 presentation + demo, then 4 Q&A
 
@@ -100,10 +100,9 @@ For Q&A: **Case → Try to close case** (guardrail), **Planner → λ slider / M
 cd backend && source .venv/bin/activate && python ../round2_submission/slides/figures/src/compute_numbers.py && cd ..
 cd round2_submission/slides/figures/src && python3 gen_macros.py && uv run --with matplotlib python make_charts.py && cd ../..
 tectonic plumeproof_round2.tex
-cd ../report && pandoc round2_report.md -o round2_report.pdf --pdf-engine=tectonic
+cd ../report && pandoc round2_report.md -o round2_report.pdf --pdf-engine=tectonic -H assets/style.tex -B assets/titlepage.tex --lua-filter assets/web_only.lua
 ```
 
 ## Still to fill in by hand
 
-1. **Team Number**: on the front slide (`[TEAM NO.]`) and in the table at the top of this sheet.
-2. **Video path**: the `plumeproof_60s.mp4` location in the Links table above.
+Nothing: the team number (T028), live link, GitHub link and video are all in place.
