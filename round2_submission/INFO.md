@@ -28,16 +28,16 @@ The demo carries the most marks, so it gets the biggest block. The video plays f
 
 | Slide | Content | Speaker | Time | Clock |
 |---|---|---|---|---|
-| 1 | Front page | Bipra | 0:10 | 0:10 |
-| 2 | 60-second video | Bipra | 0:45 | 0:55 |
-| 3 | Problem + Kanjur test case (real data) | Bipra | 0:30 | 1:25 |
-| 4 | Solution: input → agent → human approval → verified outcome; end users | Mandar | 0:30 | 1:55 |
-| 5 | USPs: EIG planning, evidence-gated closure, auto-reopen | Bipra | 0:40 | 2:35 |
-| 6 | How it works: deterministic core, LLM only drafts | Bipra | 0:15 | 2:50 |
-| 7 | **Live demo** | Mandar | **2:30** | 5:20 |
-| 8 | Results | Bipra | 0:25 | 5:45 |
-| 9 | Impact, limits, next steps, thank you | Bipra | 0:15 | **6:00** |
-| 10 | Backup: assumptions, real vs simulated (Q&A only) | — | — | — |
+| 1 | Front page (T028, links) | Bipra | 0:10 | 0:10 |
+| 2 | Product Video (60 s video) | Bipra | 1:05 | 1:15 |
+| 3 | Problem Statement (Kanjur, real data) | Bipra | 0:25 | 1:40 |
+| 4 | Proposed Solution: input → agent → human approval → output; end users | Mandar | 0:25 | 2:05 |
+| 5 | Key Innovations: EIG planning, evidence-gated closure, auto-reopen | Bipra | 0:35 | 2:40 |
+| 6 | System Architecture: deterministic core, LLM only drafts | Bipra | 0:15 | 2:55 |
+| 7 | **Live Demonstration** | Mandar | **2:30** | 5:25 |
+| 8 | Evaluation Results | Bipra | 0:20 | 5:45 |
+| 9 | Impact and Next Steps, thank you | Bipra | 0:15 | **6:00** |
+| 10 | Appendix: data provenance and assumptions (Q&A only) | — | — | — |
 
 If the demo runs long, jump from step 8 straight to step 11 (reopened) and go back to slide 8.
 
@@ -92,7 +92,8 @@ For Q&A: **Case → Try to close case** (guardrail), **Planner → λ slider / M
 | `slides/figures/numbers.tex` | Generated LaTeX number macros (do not edit) |
 | `slides/figures/src/` | Scripts that compute the numbers, draw the charts, take the screenshots and check that the numbers match across files |
 | `report/round2_report.md` / `.pdf` | Detailed written report in plain language |
-| `speech/speech_6min.md` | **Local only, not in git.** Word-for-word 6-minute script for Bipra and Mandar, timing, cues, fallback plan, 12 Q&A answers |
+| `speech/speech_12min.md` | **Local only, not in git.** Main script: natural 6:00 talk + demo (Part A) and ~6 min of Q&A prep, 16 questions incl. tough ones (Part B) |
+| `speech/speech_6min.md` | **Local only, not in git.** Earlier 6-minute draft (timing superseded by speech_12min.md) |
 | `INFO.md` | This sheet |
 
 **Rebuild:**
