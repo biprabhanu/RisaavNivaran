@@ -233,6 +233,45 @@ Wait for satellite & \nEigSat & \nCostSat & \nGainSat\\
 Python · FastAPI · SQLite · React · one Docker container on Render · 128 backend tests + 3 browser tests
 \end{frame}
 
+% ======================= AGENT TOOL CALLS =======================
+\begin{frame}[t]{How the Agent Works: Tool Calls}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+{\small\bfseries The agent loop}\\[0.15cm]
+\begin{tikzpicture}[s/.style={draw=teal,fill=tealL!45,rounded corners=3pt,font=\scriptsize\bfseries,minimum width=1.55cm,minimum height=0.6cm},a/.style={-{Stealth[length=4pt]},slate,line width=0.8pt}]
+\node[s](o) at (0,0){Observe}; \node[s](u) at (2.1,0){Update}; \node[s](pl) at (4.2,0){Plan};
+\node[s](ap) at (4.2,-1.2){Approve}; \node[s](ac) at (2.1,-1.2){Act}; \node[s](v) at (0,-1.2){Verify};
+\draw[a](o)--(u); \draw[a](u)--(pl); \draw[a](pl)--(ap); \draw[a](ap)--(ac); \draw[a](ac)--(v); \draw[a](v)--(o);
+\end{tikzpicture}\\[0.25cm]
+\footnotesize
+\begin{itemize}\setlength\itemsep{3pt}
+\item \textbf{6 deterministic tools}; each call is logged with its input, output and evidence link
+\item The agent \emph{requests} actions; the state machine validates every transition
+\item Critical calls wait in the \textbf{human approval queue}
+\item The LLM never calls a tool that changes state; it only drafts text
+\end{itemize}
+\end{column}
+\begin{column}{0.47\textwidth}
+{\small\bfseries Tools and calls in the Kanjur replay (15 calls)}\\[0.15cm]
+\renewcommand{\arraystretch}{1.2}
+\scriptsize
+\begin{tabular}{@{}l >{\raggedright\arraybackslash}p{2.4cm} r@{}}
+\toprule
+Tool & What it does & Calls\\
+\midrule
+\texttt{query\_observations} & fetch satellite plumes & 2\\
+\texttt{overlay\_facility\_zones} & map plume to site zones and owners & 1\\
+\texttt{rank\_actions} & EIG per rupee and day ranking & 3\\
+\texttt{draft\_notice} & draft notice for approval & 2\\
+\texttt{track\_deadline} & set and check deadlines & 6\\
+\texttt{evaluate\_measurement} & apply the closure rule & 1\\
+\bottomrule
+\end{tabular}\\[0.12cm]
+{\tiny\color{slate}Counts from the app's tool-call log (GET /api/cases/KJ-2025-02/tool-calls).}
+\end{column}
+\end{columns}
+\end{frame}
+
 % ======================= 6. LIVE DEMO =======================
 \begin{frame}[t]{Live Demonstration}
 \begin{columns}[T]
@@ -357,4 +396,18 @@ Python · FastAPI · SQLite · React · one Docker container on Render · 128 ba
 \end{columns}
 \end{frame}
 
+
+% ======================= REFERENCES =======================
+\begin{frame}[t]{References}
+\scriptsize
+\begin{enumerate}\setlength\itemsep{5pt}
+\item[{[1]}] UNEP (23 Jun 2026). UNEP, partners ramp up efforts to address major methane leaks as UN chief urges rapid cuts.\\ \href{https://www.unep.org/news-and-stories/press-release/unep-partners-ramp-efforts-address-major-methane-leaks-un-chief}{\color{teal}unep.org/news-and-stories/press-release/unep-partners-ramp-efforts-address-major-methane-leaks-un-chief}
+\item[{[2]}] Carbon Mapper (22 Jul 2026). Examining methane emissions at Mumbai waste sites.\\ \href{https://carbonmapper.org/articles/mumbai-waste-sites}{\color{teal}carbonmapper.org/articles/mumbai-waste-sites}
+\item[{[3]}] Down To Earth (5 May 2026). UN methane alert system expanded to coal and waste sectors after Indian landfill named among world's top emitters.\\ \href{https://www.downtoearth.org.in/climate-change}{\color{teal}downtoearth.org.in/climate-change}
+\item[{[4]}] UNEP IMEO (May 2026). Mapping the world's biggest methane sources and tracking country response: MARS snapshot.\\ \href{https://methanedata.unep.org/story-MARS-snapshot}{\color{teal}methanedata.unep.org/story-MARS-snapshot}
+\item[{[5]}] Allen, A., Mateo-Garcia, G., et al. (2025). AI for methane detection: from continuous monitoring to verified mitigation. arXiv:2511.21777.\\ \href{https://arxiv.org/abs/2511.21777}{\color{teal}arxiv.org/abs/2511.21777}
+\item[{[6]}] NASA/JPL-Caltech (2022). EMIT methane plume image, PIA25592.\\ \href{https://photojournal.jpl.nasa.gov/catalog/PIA25592}{\color{teal}photojournal.jpl.nasa.gov/catalog/PIA25592}
+\item[{[7]}] IISD SDG Knowledge Hub (2025). UN report calls for scaling action on methane through data-driven solutions.\\ \href{https://sdg.iisd.org/news/un-report-calls-for-scaling-action-on-methane-through-data-driven-solutions}{\color{teal}sdg.iisd.org/news/un-report-calls-for-scaling-action-on-methane-through-data-driven-solutions}
+\end{enumerate}
+\end{frame}
 \end{document}
